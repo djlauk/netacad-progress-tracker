@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { personState } from '../src/logic/status.ts';
 import { DEFAULT_SETTINGS } from '../src/store/settings.ts';
-import { NO_ACTIVITY, NO_SALUTATION, PLACEHOLDERS, expandTemplate, placeholderHint, templateVars, type TemplateContext } from '../src/views/template.ts';
+import { NO_ACTIVITY, NO_SALUTATION, PLACEHOLDERS, templateCourse, expandTemplate, placeholderHint, templateVars, type TemplateContext } from '../src/views/template.ts';
 import { TODAY, fixtureModel } from './helpers.ts';
 
 const model = fixtureModel();
@@ -51,4 +51,13 @@ test('no activity → marker in activity placeholders', () => {
 test('salutation: stored text, else marker', () => {
   assert.equal(templateVars(ctx('bruno.brach.inf24@stud.example.ch')).salutation, NO_SALUTATION);
   assert.equal(templateVars(ctx('bruno.brach.inf24@stud.example.ch', 'Sehr geehrter Herr Brach')).salutation, 'Sehr geehrter Herr Brach');
+});
+
+test('template course: the one with the latest activity, not a course without activity', () => {
+  const person = model.personByKey.get('anna.aktiv.inf24@stud.example.ch')!;
+  const state = personState(person, undefined, DEFAULT_SETTINGS, TODAY);
+  assert.equal(state.courses.length, 2);
+  const cs = templateCourse(state);
+  assert.deepEqual(cs.activity, state.activity);
+  assert.equal(cs.activity?.date, '2026-10-28');
 });

@@ -5,7 +5,17 @@ import type { Flag, LearnerNotes } from '../types.ts';
 import { STATUS_META, fillTemplate, firstName, fmtDate, fmtNum, fmtPct } from './format.ts';
 import type { Html } from './layout.ts';
 
-/** Context for the contact template: the person and the course with the longest inactivity. */
+/**
+ * Course for the template's course placeholders: among current, not completed courses (else all),
+ * the one with the latest activity — the same one that sets the person's status. Without any activity: the first.
+ */
+export function templateCourse(state: PersonState): CourseState {
+  const pool = state.courses.filter((c) => c.inLatest && !c.completed);
+  const cands = pool.length ? pool : state.courses;
+  return cands.reduce((m, c) => (c.activity && (!m.activity || c.activity.date > m.activity.date) ? c : m), cands[0]);
+}
+
+/** Context for the contact template: the person and the course from templateCourse(). */
 export type TemplateContext = {
   person: Person;
   state: PersonState;
@@ -48,7 +58,7 @@ export const PLACEHOLDERS: { group: string; items: Placeholder[] }[] = [
     ],
   },
   {
-    group: 'Kurs (der Kurs mit der längsten Inaktivität)',
+    group: 'Kurs (der Kurs mit der letzten Aktivität)',
     items: [
       { key: 'course', label: 'Kurstitel', value: (c) => c.course.name },
       { key: 'courseId', label: 'Kurs-ID laut NetAcad', value: (c) => c.course.courseId },

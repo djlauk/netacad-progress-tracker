@@ -381,7 +381,7 @@ Eine Zeile pro Person. Spalten:
 
   Das Geschlecht ist in den NetAcad-Daten nicht enthalten. Deshalb wird die Anrede pro Person erfasst. Fehlt sie, ergibt `{salutation}` den auffälligen Text `-- Anrede fehlt --`.
 
-  Platzhalter mit englischen Namen, gleich wie die Felder der Snapshot-Dateien, wo es ein solches Feld gibt. Kursbezogene Werte gelten für den **Kurs mit der längsten Inaktivität** (unter den aktuellen, nicht abgeschlossenen Kursen der Person; gibt es keinen, unter allen). Fehlende Werte: «–». Flags: «ja» / «nein» / Rohtext aus NetAcad. Unbekannte Platzhalter bleiben unverändert stehen. Im Betreff werden Zeilenumbrüche zu Leerzeichen. Definiert an einer Stelle (`views/template.ts`); dieselbe Liste erscheint als Hilfe unter den Feldern in den Einstellungen.
+  Platzhalter mit englischen Namen, gleich wie die Felder der Snapshot-Dateien, wo es ein solches Feld gibt. Kursbezogene Werte gelten für den **Kurs mit der letzten Aktivität** (unter den aktuellen, nicht abgeschlossenen Kursen der Person; gibt es keinen, unter allen). Das ist derselbe Kurs, der den Status der Person bestimmt. Kurse ohne Aktivität (z. B. frisch eingeschrieben) werden nur gewählt, wenn kein Kurs Aktivität hat; dann der erste. Fehlende Werte: «–». Flags: «ja» / «nein» / Rohtext aus NetAcad. Unbekannte Platzhalter bleiben unverändert stehen. Im Betreff werden Zeilenumbrüche zu Leerzeichen. Definiert an einer Stelle (`views/template.ts`); dieselbe Liste erscheint als Hilfe unter den Feldern in den Einstellungen.
 
   | Platzhalter            | Wert                                                                |
   | ---------------------- | ------------------------------------------------------------------- |

@@ -1,10 +1,10 @@
 import { html } from 'hono/html';
 import type { Model, Person } from '../logic/model.ts';
-import { compare, inactiveDays, type PersonState } from '../logic/status.ts';
+import { compare, type PersonState } from '../logic/status.ts';
 import type { LearnerNotes, Settings } from '../types.ts';
 import { gradeChart } from './charts.ts';
 import { fmtDate, fmtNum, fmtPct, LEVEL_META } from './format.ts';
-import { expandTemplate, lastName } from './template.ts';
+import { expandTemplate, lastName, templateCourse } from './template.ts';
 import { csrfField, type Html } from './layout.ts';
 import { activityCell, statusBadge, statusExtras } from './people.ts';
 
@@ -50,11 +50,9 @@ ${csrfField(csrf)}
 }
 
 export function templateSection(p: Person, st: PersonState, notes: LearnerNotes, model: Model, settings: Settings, csrf: string, msg?: string): Html {
-  const pool = st.courses.filter((c) => c.inLatest && !c.completed);
-  const cands = pool.length ? pool : st.courses;
-  const worst = cands.reduce((m, c) => (inactiveDays(c.days) > inactiveDays(m.days) ? c : m), cands[0]);
-  const course = model.courseByKey.get(worst.courseKey)!;
-  const ctx = { person: p, state: st, course, cs: worst, notes, courseName: (k: string) => model.courseByKey.get(k)?.name ?? k };
+  const cs = templateCourse(st);
+  const course = model.courseByKey.get(cs.courseKey)!;
+  const ctx = { person: p, state: st, course, cs, notes, courseName: (k: string) => model.courseByKey.get(k)?.name ?? k };
   const subject = expandTemplate(settings.contactSubject, ctx).replace(/\s+/g, ' ').trim();
   const text = expandTemplate(settings.contactTemplate, ctx);
   const mailto = p.email
