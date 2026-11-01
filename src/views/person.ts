@@ -1,12 +1,12 @@
 import { html } from 'hono/html';
 import type { Model, Person } from '../logic/model.ts';
-import { compare, type PersonState } from '../logic/status.ts';
+import { compare, inactiveDays, type PersonState } from '../logic/status.ts';
 import type { LearnerNotes, Settings } from '../types.ts';
 import { gradeChart } from './charts.ts';
-import { SOURCE_LABEL, ago, fmtDate, fmtNum, fmtPct, LEVEL_META } from './format.ts';
+import { fmtDate, fmtNum, fmtPct, LEVEL_META } from './format.ts';
 import { expandTemplate } from './template.ts';
 import { csrfField, type Html } from './layout.ts';
-import { statusBadge, statusExtras } from './people.ts';
+import { activityCell, statusBadge, statusExtras } from './people.ts';
 
 const CHANNELS = ['E-Mail', 'Teams', 'persönlich'];
 
@@ -52,7 +52,7 @@ ${csrfField(csrf)}
 function templateSection(p: Person, st: PersonState, model: Model, settings: Settings): Html {
   const pool = st.courses.filter((c) => c.inLatest && !c.completed);
   const cands = pool.length ? pool : st.courses;
-  const worst = cands.reduce((m, c) => (c.activity.date < m.activity.date ? c : m), cands[0]);
+  const worst = cands.reduce((m, c) => (inactiveDays(c.days) > inactiveDays(m.days) ? c : m), cands[0]);
   const course = model.courseByKey.get(worst.courseKey)!;
   const ctx = { person: p, state: st, course, cs: worst, courseName: (k: string) => model.courseByKey.get(k)?.name ?? k };
   const subject = expandTemplate(settings.contactSubject, ctx).replace(/\s+/g, ' ').trim();
@@ -79,7 +79,7 @@ function courseBlock(st: PersonState['courses'][number], model: Model): Html {
   return html`<article class="course-block">
 <header><h3><a href="/courses/${course.id}">${course.name}</a></h3>
 <p><span class="badge badge-${lv === 'completed' ? 'completed' : lv === 'gone' ? 'gone' : lv}">${LEVEL_META[lv].icon} ${LEVEL_META[lv].label}</span>
-Klassennote ${fmtPct(st.last.classGrade)} · ${st.submitted}/${st.total} Prüfungen · letzte Aktivität <span title="${SOURCE_LABEL[st.activity.source]}">${fmtDate(st.activity.date)}</span> (${ago(st.days)})${
+Klassennote ${fmtPct(st.last.classGrade)} · ${st.submitted}/${st.total} Prüfungen · letzte Aktivität ${activityCell(st.activity, st.days, true)}${
   st.unchanged >= 2 ? html` · unverändert seit ${st.unchanged} Snapshots` : ''}${!st.inLatest ? html` · fehlt im neuesten Snapshot` : ''}${
   st.last.status ? html` · NetAcad-Status: ${st.last.status}` : ''}</p></header>
 ${gradeChart(pts, `Verlauf der Klassennote im Kurs ${course.name}`)}
@@ -100,7 +100,7 @@ ${changes.map(({ date, c }) => html`<li>${fmtDate(date)}: ${[
 export function personPage(p: Person, st: PersonState, notes: LearnerNotes, model: Model, settings: Settings, csrf: string, today: string): Html {
   return html`<p><a href="/people" hx-boost="true">← Personen</a></p>
 <hgroup class="page-head"><h1>${p.name || p.email}</h1><p>${p.email ?? 'keine E-Mail-Adresse'}</p></hgroup>
-<p class="person-status">${statusBadge(st.status)} ${statusExtras(st)} · letzte Aktivität <span title="${SOURCE_LABEL[st.activity.source]}">${fmtDate(st.activity.date)}</span> (${ago(st.days)}) · erster Snapshot ${fmtDate(st.firstSeen)}</p>
+<p class="person-status">${statusBadge(st.status)} ${statusExtras(st)} · letzte Aktivität ${activityCell(st.activity, st.days, true)} · erster Snapshot ${fmtDate(st.firstSeen)}</p>
 ${p.warnings.map((w) => html`<p class="msg msg-warn">${w}</p>`)}
 ${st.courses.map((c) => courseBlock(c, model))}
 <div class="grid two-col">

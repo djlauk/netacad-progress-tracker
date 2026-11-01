@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { personState } from '../src/logic/status.ts';
 import { DEFAULT_SETTINGS } from '../src/store/settings.ts';
-import { PLACEHOLDERS, expandTemplate, placeholderHint, templateVars, type TemplateContext } from '../src/views/template.ts';
+import { NO_ACTIVITY, PLACEHOLDERS, expandTemplate, placeholderHint, templateVars, type TemplateContext } from '../src/views/template.ts';
 import { TODAY, fixtureModel } from './helpers.ts';
 
 const model = fixtureModel();
@@ -41,4 +41,9 @@ test('unknown placeholders stay; hint lists every placeholder', async () => {
   assert.equal(expandTemplate('{gibtsNicht} {firstName}', ctx('anna.aktiv.inf24@stud.example.ch')), '{gibtsNicht} Anna');
   const hint = String(await placeholderHint());
   for (const g of PLACEHOLDERS) for (const p of g.items) assert.ok(hint.includes(`{${p.key}}`), p.key);
+});
+
+test('no activity → marker in activity placeholders', () => {
+  const v = templateVars(ctx('carla.leer.im26@stud.example.ch'));
+  for (const k of ['lastActivity', 'daysInactive', 'lastActivityAll', 'daysInactiveAll']) assert.equal(v[k], NO_ACTIVITY, k);
 });

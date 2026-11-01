@@ -6,7 +6,6 @@ export { fmtNum };
 export const STATUS_META: Record<StatusCode, { icon: string; label: string }> = {
   alert: { icon: '🔴', label: 'nachfragen' },
   watch: { icon: '🟡', label: 'beobachten' },
-  new: { icon: '🆕', label: 'neu' },
   active: { icon: '🟢', label: 'aktiv' },
   snoozed: { icon: '💤', label: 'pausiert' },
   completed: { icon: '✅', label: 'abgeschlossen' },
@@ -23,8 +22,7 @@ export const LEVEL_META: Record<ActivityLevel | 'completed' | 'gone', { icon: st
 
 export const SOURCE_LABEL: Record<ActivitySource, string> = {
   submitted: 'Datum einer Prüfungsabgabe laut NetAcad',
-  snapshot: 'Datum des Snapshots, in dem der Fortschritt sichtbar wurde',
-  firstSeen: 'keine Aktivität: erster Snapshot, in dem die Person auftaucht',
+  snapshot: 'Datum des Snapshots, in dem die Prüfung sichtbar wurde (NetAcad ohne Abgabedatum)',
 };
 
 /** YYYY-MM-DD → TT.MM.JJJJ */

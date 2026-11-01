@@ -11,18 +11,17 @@ export const DEFAULT_TEMPLATE =
 export const DEFAULT_SETTINGS: Settings = {
   warnDays: 21,
   alertDays: 42,
-  newDays: 14,
   contactSubject: DEFAULT_SUBJECT,
   contactTemplate: DEFAULT_TEMPLATE,
 };
 
 export function normalizeSettings(raw: unknown): Settings {
   const o = (typeof raw === 'object' && raw !== null ? raw : {}) as Record<string, unknown>;
-  const int = (k: 'warnDays' | 'alertDays' | 'newDays') =>
+  const int = (k: 'warnDays' | 'alertDays') =>
     typeof o[k] === 'number' && Number.isInteger(o[k]) && (o[k] as number) > 0 ? (o[k] as number) : DEFAULT_SETTINGS[k];
   const str = (k: 'contactSubject' | 'contactTemplate') =>
     typeof o[k] === 'string' && (o[k] as string).trim() ? (o[k] as string) : DEFAULT_SETTINGS[k];
-  return { warnDays: int('warnDays'), alertDays: int('alertDays'), newDays: int('newDays'), contactSubject: str('contactSubject'), contactTemplate: str('contactTemplate') };
+  return { warnDays: int('warnDays'), alertDays: int('alertDays'), contactSubject: str('contactSubject'), contactTemplate: str('contactTemplate') };
 }
 
 export type SettingsInput = Record<string, string | undefined>;
@@ -37,14 +36,13 @@ export function validateSettings(input: SettingsInput): { ok: true; settings: Se
   };
   const warnDays = num('warnDays', 'Beobachten ab');
   const alertDays = num('alertDays', 'Nachfragen ab');
-  const newDays = num('newDays', 'Neu während');
   if (!errors.length && warnDays >= alertDays) errors.push('«Nachfragen ab» muss grösser sein als «Beobachten ab»');
   const contactSubject = (input.contactSubject ?? '').trim();
   if (!contactSubject) errors.push('Betreff darf nicht leer sein');
   const contactTemplate = (input.contactTemplate ?? '').replace(/\r\n/g, '\n');
   if (!contactTemplate.trim()) errors.push('Nachfrage-Vorlage darf nicht leer sein');
   if (errors.length) return { ok: false, errors };
-  return { ok: true, settings: { warnDays, alertDays, newDays, contactSubject, contactTemplate } };
+  return { ok: true, settings: { warnDays, alertDays, contactSubject, contactTemplate } };
 }
 
 export function createSettingsStore(dataDir: string) {

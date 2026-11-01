@@ -208,14 +208,14 @@ test('file dropped into snapshots dir appears without restart', async () => {
 
 test('settings: invalid values are rejected, valid saved', async () => {
   const { post, dataDir } = setup(false);
-  const bad = new URLSearchParams({ warnDays: '42', alertDays: '21', newDays: '14', contactSubject: '', contactTemplate: 'Hallo {firstName}' });
+  const bad = new URLSearchParams({ warnDays: '42', alertDays: '21', contactSubject: '', contactTemplate: 'Hallo {firstName}' });
   const r = await post('/settings', bad);
   assert.equal(r.status, 400);
   const errHtml = await r.text();
   assert.match(errHtml, /muss grösser sein/);
   assert.match(errHtml, /Betreff darf nicht leer sein/);
   assert.ok(!fs.existsSync(path.join(dataDir, 'settings.json')));
-  const good = new URLSearchParams({ warnDays: '10', alertDays: '30', newDays: '7', contactSubject: 'Frage zu {course}', contactTemplate: 'Hallo {firstName}' });
+  const good = new URLSearchParams({ warnDays: '10', alertDays: '30', contactSubject: 'Frage zu {course}', contactTemplate: 'Hallo {firstName}' });
   assert.equal((await post('/settings', good)).status, 200);
   const saved = JSON.parse(fs.readFileSync(path.join(dataDir, 'settings.json'), 'utf8'));
   assert.equal(saved.warnDays, 10);

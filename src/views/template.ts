@@ -22,6 +22,9 @@ function lastName(name: string): string {
   return i >= 0 ? name.slice(0, i).trim() : '';
 }
 
+/** Stands out in the mail text so it gets fixed up by hand. */
+export const NO_ACTIVITY = '-- noch keine Aktivität --';
+
 type Placeholder = { key: string; label: string; value: (c: TemplateContext) => string };
 
 /** Single source for expansion and for the hint under the settings textarea. */
@@ -34,8 +37,8 @@ export const PLACEHOLDERS: { group: string; items: Placeholder[] }[] = [
       { key: 'name', label: 'voller Name laut NetAcad («Nachname, Vorname»)', value: (c) => c.person.name },
       { key: 'email', label: 'E-Mail-Adresse', value: (c) => c.person.email ?? '–' },
       { key: 'progressStatus', label: 'Status in dieser Übersicht (z. B. «nachfragen»)', value: (c) => STATUS_META[c.state.status].label },
-      { key: 'lastActivityAll', label: 'letzte Aktivität über alle Kurse', value: (c) => fmtDate(c.state.activity.date) },
-      { key: 'daysInactiveAll', label: 'Tage seit der letzten Aktivität über alle Kurse', value: (c) => String(c.state.days) },
+      { key: 'lastActivityAll', label: 'letzte Aktivität über alle Kurse', value: (c) => (c.state.activity ? fmtDate(c.state.activity.date) : NO_ACTIVITY) },
+      { key: 'daysInactiveAll', label: 'Tage seit der letzten Aktivität über alle Kurse', value: (c) => (c.state.days === null ? NO_ACTIVITY : String(c.state.days)) },
       { key: 'allCourses', label: 'alle Kurse der Person', value: (c) => list(c.state.courses.map((s) => c.courseName(s.courseKey))) },
     ],
   },
@@ -45,8 +48,8 @@ export const PLACEHOLDERS: { group: string; items: Placeholder[] }[] = [
       { key: 'course', label: 'Kurstitel', value: (c) => c.course.name },
       { key: 'courseId', label: 'Kurs-ID laut NetAcad', value: (c) => c.course.courseId },
       { key: 'snapshotDate', label: 'Datum des neuesten Snapshots des Kurses', value: (c) => fmtDate(c.course.snapshots[c.course.snapshots.length - 1].snapshotDate) },
-      { key: 'lastActivity', label: 'letzte Aktivität in diesem Kurs', value: (c) => fmtDate(c.cs.activity.date) },
-      { key: 'daysInactive', label: 'Tage seit der letzten Aktivität in diesem Kurs', value: (c) => String(c.cs.days) },
+      { key: 'lastActivity', label: 'letzte Aktivität in diesem Kurs', value: (c) => (c.cs.activity ? fmtDate(c.cs.activity.date) : NO_ACTIVITY) },
+      { key: 'daysInactive', label: 'Tage seit der letzten Aktivität in diesem Kurs', value: (c) => (c.cs.days === null ? NO_ACTIVITY : String(c.cs.days)) },
       { key: 'firstSeen', label: 'erster Snapshot mit dieser Person im Kurs', value: (c) => fmtDate(c.cs.enrollment.firstSeen) },
       { key: 'status', label: 'Status laut NetAcad (z. B. «IN PROGRESS»)', value: (c) => c.cs.last.status ?? '–' },
       { key: 'classGrade', label: 'Klassennote in Prozent', value: (c) => fmtPct(c.cs.last.classGrade) },

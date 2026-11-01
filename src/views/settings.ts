@@ -6,7 +6,7 @@ import { placeholderHint } from './template.ts';
 export type SettingsForm = Record<keyof Settings, string>;
 
 export const toForm = (s: Settings): SettingsForm => ({
-  warnDays: String(s.warnDays), alertDays: String(s.alertDays), newDays: String(s.newDays),
+  warnDays: String(s.warnDays), alertDays: String(s.alertDays),
   contactSubject: s.contactSubject, contactTemplate: s.contactTemplate,
 });
 
@@ -19,7 +19,6 @@ ${messages(msgs)}
 <div class="grid">
 <label>Beobachten ab (Tage ohne Aktivität)<input type="number" name="warnDays" min="1" max="3650" value="${form.warnDays}" required></label>
 <label>Nachfragen ab (Tage ohne Aktivität)<input type="number" name="alertDays" min="1" max="3650" value="${form.alertDays}" required></label>
-<label>«Neu» während (Tage nach dem ersten Auftritt)<input type="number" name="newDays" min="1" max="3650" value="${form.newDays}" required></label>
 </div>
 <label>Betreff der Nachfrage<input type="text" name="contactSubject" value="${form.contactSubject}" required maxlength="300"></label>
 <label>Nachfrage-Vorlage<textarea name="contactTemplate" rows="6" required>${form.contactTemplate}</textarea>

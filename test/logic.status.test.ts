@@ -20,7 +20,7 @@ test('person in 2 courses, progress in only one → active', () => {
   const st = state('anna.aktiv.inf24@stud.example.ch');
   assert.equal(person('anna.aktiv.inf24@stud.example.ch').enrollments.length, 2);
   assert.equal(st.status, 'active');
-  assert.equal(st.activity.date, '2026-10-28');
+  assert.equal(st.activity?.date, '2026-10-28');
   const a = st.courses.find((c) => model.courseByKey.get(c.courseKey)!.name.startsWith('JavaScript'))!;
   assert.equal(a.level, 'alert', 'course without progress still marked');
 });
@@ -28,16 +28,15 @@ test('person in 2 courses, progress in only one → active', () => {
 test('no activity for more than 42 days → alert', () => {
   const st = state('bruno.brach.inf24@stud.example.ch');
   assert.equal(st.status, 'alert');
-  assert.equal(st.activity.source, 'submitted');
-  assert.ok(st.days > 42);
+  assert.equal(st.activity?.source, 'submitted');
+  assert.ok(st.days !== null && st.days > 42);
 });
 
-test('no submitted assessment, enrolled 50 days ago → alert, firstSeen', () => {
+test('no submitted assessment → alert, no activity', () => {
   const st = state('carla.leer.im26@stud.example.ch');
   assert.equal(st.status, 'alert');
-  assert.equal(st.activity.source, 'firstSeen');
-  assert.equal(st.activity.date, '2026-09-12');
-  assert.equal(st.days, 50);
+  assert.equal(st.activity, null);
+  assert.equal(st.days, null);
 });
 
 test('two snapshots on the same day → newer export wins', () => {
@@ -56,7 +55,7 @@ test('identical consecutive snapshots → unchanged since 2 snapshots', () => {
   assert.equal(unchangedCount(h.enrollments[0]), 2);
   const st = state('hans.neu.inf24@stud.example.ch');
   assert.equal(st.unchanged, 2);
-  assert.equal(st.status, 'new');
+  assert.equal(st.status, 'alert', 'no exam activity, even though first seen recently');
 });
 
 test('person missing in newest snapshot → gone', () => {
@@ -70,7 +69,7 @@ test('lower score → anomaly, not progress', () => {
   assert.equal(c.progress, false);
   assert.ok(c.anomalies.some((a) => a.kind === 'scoreDrop'));
   assert.ok(c.anomalies.some((a) => a.kind === 'gradeDrop'));
-  assert.equal(lastActivity(e).date, '2026-09-10');
+  assert.equal(lastActivity(e)?.date, '2026-09-10');
   assert.equal(state('felix.fallend.inf24@stud.example.ch').status, 'alert');
 });
 
@@ -98,18 +97,45 @@ test('person without email: name key and warning', () => {
   assert.ok(f.warnings.some((w) => /ohne E-Mail/.test(w)));
 });
 
-test('progress not datable via submittedOn → snapshot date', () => {
-  const pt = (o: Partial<Point>): Point => ({
-    snapshotDate: '2026-10-01', exportedAt: '', classGrade: 10, status: 'IN PROGRESS', finalExamScore: null,
-    finalExamSubmitted: false, surveySubmitted: false, markedComplete: false, assessments: [], ...o,
-  });
-  const enr = {
-    personKey: 'x', courseKey: 'k', inLatest: true, firstSeen: '2026-09-01', points: [
-      pt({ snapshotDate: '2026-09-01' }), pt({ snapshotDate: '2026-10-01', classGrade: 20 }), pt({ snapshotDate: '2026-10-15', classGrade: 20 }),
+const pt = (o: Partial<Point>): Point => ({
+  snapshotDate: '2026-10-01', exportedAt: '', classGrade: 10, status: 'IN PROGRESS', finalExamScore: null,
+  finalExamSubmitted: false, surveySubmitted: false, markedComplete: false, assessments: [], ...o,
+});
+const exam = (score: number | null, submittedOn: string | null = null) => [{ name: 'M1', score, maxScore: 100, submittedOn }];
+const enrollment = (points: Point[], courseKey = 'k') => ({ personKey: 'x', courseKey, inLatest: true, firstSeen: points[0].snapshotDate, points });
+
+test('grade, status or flag changes alone are no activity', () => {
+  const enr = enrollment([
+    pt({ snapshotDate: '2026-09-01', status: 'NOT STARTED' }),
+    pt({ snapshotDate: '2026-10-01', classGrade: 20, status: 'IN PROGRESS', markedComplete: true }),
+    pt({ snapshotDate: '2026-10-15', classGrade: 20, status: 'IN PROGRESS', markedComplete: true }),
+  ]);
+  assert.equal(lastActivity(enr), null);
+  assert.equal(unchangedCount(enr), 2);
+});
+
+test('score without submittedOn → date of the snapshot where it appears or rises', () => {
+  assert.deepEqual(lastActivity(enrollment([
+    pt({ snapshotDate: '2026-09-01', assessments: exam(null) }),
+    pt({ snapshotDate: '2026-10-01', assessments: exam(50) }),
+    pt({ snapshotDate: '2026-10-15', assessments: exam(50) }),
+  ])), { date: '2026-10-01', source: 'snapshot' });
+  assert.deepEqual(lastActivity(enrollment([pt({ snapshotDate: '2026-09-01', assessments: exam(50) })])), { date: '2026-09-01', source: 'snapshot' });
+});
+
+test('second course without activity does not hide activity elsewhere; no "new" on first import', () => {
+  const person = {
+    key: 'x', id: 'x', name: 'X, Y', email: null, warnings: [],
+    enrollments: [
+      enrollment([pt({ snapshotDate: TODAY, assessments: exam(100, '2026-10-02') })], 'a'),
+      enrollment([pt({ snapshotDate: TODAY, assessments: exam(null) })], 'b'),
     ],
   };
-  assert.deepEqual(lastActivity(enr), { date: '2026-10-01', source: 'snapshot' });
-  assert.equal(unchangedCount(enr), 2);
+  const st = personState(person, undefined, S, TODAY);
+  assert.deepEqual(st.activity, { date: '2026-10-02', source: 'submitted' });
+  assert.equal(st.status, 'watch');
+  assert.equal(st.courses[1].activity, null);
+  assert.equal(st.courses[1].level, 'alert');
 });
 
 const snap = (course: string, exportedAt: string, courseId: string, snapshotDate = '2026-11-01') => ({

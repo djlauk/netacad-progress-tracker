@@ -43,9 +43,9 @@ npm start            # → http://localhost:8765/  -- Port siehe Umgebungsvariab
 1. **Exportieren:** In NetAcad das *Course Gradebook* eines Kurses öffnen, alle Lernenden auf einer Seite anzeigen, das Bookmarklet anklicken.
 2. **Importieren:** Ein neuer Tab zeigt die Vorschau (Stand, Anzahl Lernende, neue Prüfungsabgaben seit dem letzten Snapshot, Warnungen). Mit **«Importieren»** speichern. Die Daten werden sofort aus der Adresszeile entfernt.
    Falls kein Tab aufgeht, lädt das Bookmarklet die Datei herunter: unter **Dateien** hochladen (auch mehrere Dateien, per Drag & Drop).
-3. **Nachfragen:** Die **Personenübersicht** sortiert nach Dringlichkeit (🔴 nachfragen, 🟡 beobachten, 🆕 neu, 🟢 aktiv, 💤 pausiert, ✅ abgeschlossen, ⚪ nicht mehr dabei). In der Personendetailansicht gibt es eine Nachfrage-Vorlage (kopieren oder als E-Mail öffnen), ein Kontaktprotokoll, eine Notiz und «Pausieren bis».
+3. **Nachfragen:** Die **Personenübersicht** sortiert nach Dringlichkeit (🔴 nachfragen, 🟡 beobachten, 🟢 aktiv, 💤 pausiert, ✅ abgeschlossen, ⚪ nicht mehr dabei). In der Personendetailansicht gibt es eine Nachfrage-Vorlage (kopieren oder als E-Mail öffnen), ein Kontaktprotokoll, eine Notiz und «Pausieren bis».
 
-Schwellen (Standard): beobachten ab 21, nachfragen ab 42 Tagen ohne Aktivität; «neu» während 14 Tagen. Anpassbar unter **Einstellungen**.
+Schwellen (Standard): beobachten ab 21, nachfragen ab 42 Tagen ohne Aktivität. Als Aktivität zählen nur Prüfungsergebnisse; wer noch nichts abgelegt hat, steht auf «nachfragen» (Schonfrist über «Pausieren bis»). Anpassbar unter **Einstellungen**.
 
 ## Daten und Datensicherung
 

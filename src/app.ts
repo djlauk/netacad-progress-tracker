@@ -330,7 +330,7 @@ export function createApp(opts: AppOptions) {
   app.post('/settings', async (c) => {
     const body = await c.req.parseBody({ all: true });
     const input: Record<string, string> = {};
-    for (const k of ['warnDays', 'alertDays', 'newDays', 'contactSubject', 'contactTemplate']) input[k] = first(body[k]);
+    for (const k of ['warnDays', 'alertDays', 'contactSubject', 'contactTemplate']) input[k] = first(body[k]);
     const v = validateSettings(input);
     if (!v.ok) return settingsView(c, input as SettingsForm, v.errors.map((text) => ({ kind: 'error' as const, text })), 400);
     await settingsStore.save(v.settings);

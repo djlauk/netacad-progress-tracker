@@ -1,6 +1,6 @@
 import { html } from 'hono/html';
 import type { Course, Model, Person } from '../logic/model.ts';
-import { personState, type CourseState, type PersonState } from '../logic/status.ts';
+import { inactiveDays, personState, type Activity, type CourseState, type PersonState } from '../logic/status.ts';
 import { STATUS_CODES, type Notes, type Settings, type StatusCode } from '../types.ts';
 import { LEVEL_META, SOURCE_LABEL, STATUS_META, ago, fmtDate, fmtDelta, fmtPct, plural } from './format.ts';
 import type { Html } from './layout.ts';
@@ -51,15 +51,22 @@ export function sortRows(rows: Row[], model: Model, q: PeopleQuery): Row[] {
   const byName = (a: Row, b: Row) => a.person.name.localeCompare(b.person.name, 'de');
   let cmp: (a: Row, b: Row) => number;
   if (q.sort === 'name') cmp = byName;
-  else if (q.sort === 'activity') cmp = (a, b) => a.state.activity.date.localeCompare(b.state.activity.date) || byName(a, b);
+  else if (q.sort === 'activity') cmp = (a, b) => (a.state.activity?.date ?? '').localeCompare(b.state.activity?.date ?? '') || byName(a, b);
   else if (q.sort === 'contact') cmp = (a, b) => (a.state.lastContact ?? '').localeCompare(b.state.lastContact ?? '') || byName(a, b);
   else if (q.sort.startsWith('c:')) {
     const key = model.courseById.get(q.sort.slice(2))?.key;
     const g = (r: Row) => r.state.courses.find((c) => c.courseKey === key)?.last.classGrade ?? -1;
     cmp = (a, b) => g(a) - g(b) || byName(a, b);
-  } else cmp = (a, b) => ORDER[a.state.status] - ORDER[b.state.status] || b.state.days - a.state.days || byName(a, b);
+  } else cmp = (a, b) => ORDER[a.state.status] - ORDER[b.state.status] || inactiveDays(b.state.days) - inactiveDays(a.state.days) || byName(a, b);
   const out = [...rows].sort(cmp);
   return q.dir === 'desc' ? out.reverse() : out;
+}
+
+/** Last activity: date with source tooltip, plus «vor n Tagen»; or «noch keine Aktivität». */
+export function activityCell(a: Activity | null, days: number | null, inline = false): Html {
+  if (!a || days === null) return html`<span class="muted">${inline ? 'noch keine' : 'noch keine Aktivität'}</span>`;
+  const date = html`<span title="${SOURCE_LABEL[a.source]}">${fmtDate(a.date)}</span>`;
+  return inline ? html`${date} (${ago(days)})` : html`${date}<br><small>${ago(days)}</small>`;
 }
 
 export function statusBadge(s: StatusCode): Html {
@@ -78,7 +85,7 @@ export function courseCell(c: CourseState | undefined): Html {
   const delta = fmtDelta(c.gradeDelta);
   const lv = !c.inLatest ? 'gone' : c.completed ? 'completed' : c.level;
   const mark = lv !== 'active'
-    ? html` <span class="level-icon" title="${lv === 'gone' ? 'nicht mehr im neuesten Snapshot' : lv === 'completed' ? 'abgeschlossen' : `seit ${c.days} Tagen keine Aktivität in diesem Kurs`}"><span aria-hidden="true">${LEVEL_META[lv].icon}</span><span class="visually-hidden">${LEVEL_META[lv].label}</span></span>`
+    ? html` <span class="level-icon" title="${lv === 'gone' ? 'nicht mehr im neuesten Snapshot' : lv === 'completed' ? 'abgeschlossen' : c.days === null ? 'noch keine Aktivität in diesem Kurs' : `seit ${c.days} Tagen keine Aktivität in diesem Kurs`}"><span aria-hidden="true">${LEVEL_META[lv].icon}</span><span class="visually-hidden">${LEVEL_META[lv].label}</span></span>`
     : '';
   const anomaly = c.anomalies.length
     ? html` <span class="anomaly" title="Punkte gesunken seit dem vorherigen Snapshot">⚠<span class="visually-hidden">Auffälligkeit</span></span>`
@@ -134,7 +141,7 @@ ${rows.map(({ person: p, state: st }) => html`<tr class="row-${st.status}">
 <td>${statusBadge(st.status)}${statusExtras(st)}</td>
 <td class="sticky"><a href="/people/${p.id}">${p.name || p.email}</a>${p.warnings.length ? html` <span title="${p.warnings.join('; ')}">⚠</span>` : ''}${p.name && p.email ? html`<br><small class="email">${p.email}</small>` : ''}</td>
 ${courses.map((c) => courseCell(st.courses.find((x) => x.courseKey === c.key)))}
-<td><span title="${SOURCE_LABEL[st.activity.source]}">${fmtDate(st.activity.date)}</span><br><small>${ago(st.days)}</small></td>
+<td>${activityCell(st.activity, st.days)}</td>
 <td>${st.lastContact ? fmtDate(st.lastContact) : html`<small class="muted">–</small>`}</td>
 </tr>`)}
 </tbody></table></div>` : html`<p class="muted">Keine Personen für diese Filter.</p>`}

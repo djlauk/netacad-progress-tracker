@@ -243,7 +243,7 @@ Der Server hält das berechnete Modell im Speicher. Neu berechnet wird nach eine
 
 ### 4.7 `data/settings.json`
 
-`warnDays` (21), `alertDays` (42), `newDays` (14), `contactSubject` (`NetAcad: {course}`), `contactTemplate` (siehe 7.B). Betreff und Text dürfen nicht leer sein. Fehlende Werte fallen auf die Standardwerte zurück.
+`warnDays` (21), `alertDays` (42), `contactSubject` (`NetAcad: {course}`), `contactTemplate` (siehe 7.B). Betreff und Text dürfen nicht leer sein. Fehlende Werte fallen auf die Standardwerte zurück.
 
 ## 5. Datenmodell
 
@@ -268,7 +268,7 @@ Alle Funktionen in `src/logic/`, rein und getestet. `today` wird als Parameter �
 
 ### 6.1 Fortschritt zwischen zwei Snapshots (Person × Kurs)
 
-Fortschritt liegt vor, wenn **mindestens eine** dieser Bedingungen zutrifft:
+Für die Anzeige der Änderungen zwischen Snapshots. Fortschritt liegt vor, wenn **mindestens eine** dieser Bedingungen zutrifft:
 
 - eine Prüfung hat neu einen `score` (vorher `null`), oder ihr `score` ist gestiegen,
 - `classGrade` ist gestiegen,
@@ -277,16 +277,18 @@ Fortschritt liegt vor, wenn **mindestens eine** dieser Bedingungen zutrifft:
 
 Ein gesunkener `score` oder eine gesunkene `classGrade` gilt nicht als Fortschritt, sondern wird als Auffälligkeit angezeigt.
 
+Als **Aktivität** (6.2) zählen nur Prüfungsergebnisse (`score`). Änderungen von `classGrade`, `status` oder den Flags allein sind keine Aktivität (z. B. Status-Wechsel nach dem Einschreiben in einen weiteren Kurs).
+
 ### 6.2 Letzte Aktivität
 
 `lastActivity(person, course)` ist das späteste dieser Daten:
 
 - das grösste `submittedOn` aller Prüfungen,
-- das `snapshotDate` des ersten Snapshots, in dem ein Fortschritt nach 6.1 sichtbar wurde, der sich nicht über `submittedOn` datieren lässt.
+- für Prüfungen mit `score`, aber ohne `submittedOn`: das `snapshotDate` des Snapshots, in dem der `score` erstmals auftaucht oder steigt.
 
-Gibt es keine Aktivität: das `snapshotDate` des ersten Snapshots, in dem die Person im Kurs auftaucht. Dazu `activitySource`: `"submitted"` / `"snapshot"` / `"firstSeen"` (in der UI als Tooltip).
+Dazu `activitySource`: `"submitted"` / `"snapshot"` (in der UI als Tooltip). Gibt es keine Prüfungsergebnisse, ist `lastActivity` **leer** («noch keine Aktivität»). Es gibt keinen Ersatz durch das Import- oder Einschreibedatum.
 
-`lastActivity(person)` ist das Maximum über alle Kurse.
+`lastActivity(person)` ist das Maximum über alle Kurse mit Aktivität. Ein Kurs ohne Aktivität verdrängt keine Aktivität in einem anderen Kurs. Leer nur, wenn kein Kurs Aktivität hat.
 
 ### 6.3 Status pro Person
 
@@ -297,14 +299,14 @@ Ausgewertet in dieser Reihenfolge, die erste zutreffende Regel gilt:
 | `completed` | ✅      | In allen Kursen der Person: `markedComplete === true` oder `status` enthält `COMPLET` |
 | `gone`      | ⚪      | Person fehlt im neuesten Snapshot aller ihrer Kurse                                   |
 | `snoozed`   | 💤      | `snoozeUntil >= today`                                                                |
-| `new`       | 🆕      | Erster Auftritt vor weniger als `newDays` Tagen                                       |
 | `active`    | 🟢      | `today − lastActivity(person) < warnDays`                                             |
 | `watch`     | 🟡      | `warnDays ≤ … < alertDays`                                                            |
-| `alert`     | 🔴      | `≥ alertDays` → **nachfragen**                                                        |
+| `alert`     | 🔴      | `≥ alertDays` oder keine Aktivität → **nachfragen**                                   |
 
 - Die Regel arbeitet mit **Tagen seit der letzten Aktivität**, nicht mit der Anzahl Snapshots, weil die Exporte unregelmässig erfolgen. Zusätzlich als Information: «unverändert seit *n* Snapshots».
 - Fortschritt in einem von mehreren Kursen reicht für `active`. Ein Kurs ohne Fortschritt wird in seiner Zelle trotzdem markiert.
-- Gab es seit Beginn des aktuellen `watch`/`alert`-Zustands bereits einen Kontakt, zeigt der Status zusätzlich «nachgefragt am …».
+- Keinen Status «neu»: Wer noch nichts abgelegt hat, ist sofort `alert`. Für eine Schonfrist «Pausieren bis» verwenden.
+- Gab es seit Beginn des aktuellen `watch`/`alert`-Zustands bereits einen Kontakt (ohne Aktivität: seit dem ersten Snapshot), zeigt der Status zusätzlich «nachgefragt am …».
 
 ### 6.4 Kurskennzahlen
 
@@ -358,7 +360,7 @@ Eine Zeile pro Person. Spalten:
 4. Letzte Aktivität (Datum und «vor n Tagen»)
 5. Letzter Kontakt (Datum)
 
-- Standardsortierung: `alert`, `watch`, `new`, `active`, `snoozed`, `completed`, `gone`; innerhalb davon die längste Inaktivität zuerst. Spaltenköpfe sind Sortier-Links.
+- Standardsortierung: `alert`, `watch`, `active`, `snoozed`, `completed`, `gone`; innerhalb davon die längste Inaktivität zuerst (keine Aktivität vor allen anderen). Spaltenköpfe sind Sortier-Links.
 - Filterformular: Status (Checkboxen), Kurs, Suche (Name/E-Mail). Bei jeder Änderung neu laden (`hx-trigger="change, keyup changed delay:300ms from:input[name=q]"`).
 - Kopfzeile mit Zählern, z. B. «🔴 3 · 🟡 2 · 🟢 14 · ✅ 1». Jeder Zähler ist ein Filter-Link.
 - Knopf «E-Mail-Adressen kopieren» (gefilterte Personen, getrennt durch `; `), umgesetzt mit `public/app.js`.
@@ -388,6 +390,7 @@ Eine Zeile pro Person. Spalten:
   | `{progressStatus}`     | Status in dieser Übersicht (6.3, z. B. «nachfragen»)                |
   | `{lastActivityAll}`    | letzte Aktivität über alle Kurse (`TT.MM.JJJJ`)                     |
   | `{daysInactiveAll}`    | Tage seit der letzten Aktivität über alle Kurse                     |
+  |                        | ohne Aktivität ergeben die vier Aktivitäts-Platzhalter `-- noch keine Aktivität --` (fällt auf, von Hand anpassen) |
   | `{allCourses}`         | alle Kurse der Person, kommagetrennt                                |
   | **Kurs**               |                                                                     |
   | `{course}`             | Kurstitel                                                           |
@@ -454,7 +457,9 @@ Die Daten sind Personendaten von Lernenden (Schweiz, nDSG).
 - **Logik** (`test/logic.*.test.ts`) mit **fiktiven** Fixtures für mindestens 2 Kurse und 6 Personen:
   - Person in 2 Kursen, Fortschritt nur in einem → `active`
   - Person ohne Aktivität seit über 42 Tagen → `alert`
-  - Person ohne abgelegte Prüfung, eingeschrieben vor 50 Tagen → `alert`, `activitySource = "firstSeen"`
+  - Person ohne abgelegte Prüfung → `alert`, `lastActivity` leer
+  - Person in 2 Kursen, Aktivität nur in einem, beide erstmals heute importiert → letzte Aktivität aus dem Kurs mit Aktivität, kein «neu»
+  - nur `classGrade`/`status`/Flags geändert → keine Aktivität
   - zwei Snapshots am selben Tag → der neuere gilt
   - identische aufeinanderfolgende Snapshots → «unverändert seit 2 Snapshots»
   - Person fehlt im neuesten Snapshot → `gone`

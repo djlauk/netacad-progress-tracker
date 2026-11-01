@@ -57,13 +57,12 @@ export type Notes = {
 export type Settings = {
   warnDays: number;
   alertDays: number;
-  newDays: number;
   contactSubject: string;
   contactTemplate: string;
 };
 
-export const STATUS_CODES = ['alert', 'watch', 'new', 'active', 'snoozed', 'completed', 'gone'] as const;
+export const STATUS_CODES = ['alert', 'watch', 'active', 'snoozed', 'completed', 'gone'] as const;
 export type StatusCode = (typeof STATUS_CODES)[number];
 
-export type ActivitySource = 'submitted' | 'snapshot' | 'firstSeen';
+export type ActivitySource = 'submitted' | 'snapshot';
 export type ActivityLevel = 'active' | 'watch' | 'alert';
