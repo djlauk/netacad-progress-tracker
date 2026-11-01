@@ -4,7 +4,7 @@ import type { Contact, LearnerNotes, Notes } from '../types.ts';
 import { createQueue, readJson, writeAtomic } from './fsutil.ts';
 
 const emptyNotes = (): Notes => ({ format: 'netacad-notes/1', updatedAt: null, learners: {} });
-export const emptyLearnerNotes = (): LearnerNotes => ({ note: '', contacts: [], snoozeUntil: null });
+export const emptyLearnerNotes = (): LearnerNotes => ({ note: '', salutation: '', contacts: [], snoozeUntil: null });
 
 const s = (v: unknown) => (typeof v === 'string' ? v : '');
 
@@ -21,10 +21,11 @@ export function normalizeNotes(raw: unknown): Notes {
       .sort((a, b) => a.date.localeCompare(b.date) || a.id.localeCompare(b.id));
     const ln: LearnerNotes = {
       note: s(l.note),
+      salutation: s(l.salutation).trim(),
       contacts,
       snoozeUntil: typeof l.snoozeUntil === 'string' && l.snoozeUntil ? l.snoozeUntil : null,
     };
-    if (ln.note || ln.contacts.length || ln.snoozeUntil) learners[key.toLowerCase()] = ln;
+    if (ln.note || ln.salutation || ln.contacts.length || ln.snoozeUntil) learners[key.toLowerCase()] = ln;
   }
   return { format: 'netacad-notes/1', updatedAt: typeof o.updatedAt === 'string' ? o.updatedAt : null, learners };
 }

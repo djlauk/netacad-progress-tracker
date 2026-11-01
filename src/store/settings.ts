@@ -5,7 +5,7 @@ import { readJson, writeAtomic } from './fsutil.ts';
 export const DEFAULT_SUBJECT = 'NetAcad: {course}';
 
 export const DEFAULT_TEMPLATE =
-  'Guten Tag, Herr/Frau {lastName},\n\nich sehe im Kurs «{course}», dass sich seit dem {lastActivity} nichts mehr getan hat. ' +
+  '{salutation},\n\nich sehe im Kurs «{course}», dass sich seit dem {lastActivity} nichts mehr getan hat. ' +
   'Ist gerade einfach viel los, oder kann ich Ihnen irgendwo helfen? Melden Sie sich gern, auch wenn Sie nur eine kurze Frage haben.';
 
 export const DEFAULT_SETTINGS: Settings = {

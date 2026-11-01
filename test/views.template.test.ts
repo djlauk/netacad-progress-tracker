@@ -2,16 +2,16 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { personState } from '../src/logic/status.ts';
 import { DEFAULT_SETTINGS } from '../src/store/settings.ts';
-import { NO_ACTIVITY, PLACEHOLDERS, expandTemplate, placeholderHint, templateVars, type TemplateContext } from '../src/views/template.ts';
+import { NO_ACTIVITY, NO_SALUTATION, PLACEHOLDERS, expandTemplate, placeholderHint, templateVars, type TemplateContext } from '../src/views/template.ts';
 import { TODAY, fixtureModel } from './helpers.ts';
 
 const model = fixtureModel();
 
-function ctx(email: string): TemplateContext {
+function ctx(email: string, salutation = ''): TemplateContext {
   const person = model.personByKey.get(email)!;
   const state = personState(person, undefined, DEFAULT_SETTINGS, TODAY);
   const cs = state.courses[0];
-  return { person, state, course: model.courseByKey.get(cs.courseKey)!, cs, courseName: (k) => model.courseByKey.get(k)!.name };
+  return { person, state, course: model.courseByKey.get(cs.courseKey)!, cs, notes: { salutation }, courseName: (k) => model.courseByKey.get(k)!.name };
 }
 
 test('all placeholders expand; values for a known person', () => {
@@ -46,4 +46,9 @@ test('unknown placeholders stay; hint lists every placeholder', async () => {
 test('no activity → marker in activity placeholders', () => {
   const v = templateVars(ctx('carla.leer.im26@stud.example.ch'));
   for (const k of ['lastActivity', 'daysInactive', 'lastActivityAll', 'daysInactiveAll']) assert.equal(v[k], NO_ACTIVITY, k);
+});
+
+test('salutation: stored text, else marker', () => {
+  assert.equal(templateVars(ctx('bruno.brach.inf24@stud.example.ch')).salutation, NO_SALUTATION);
+  assert.equal(templateVars(ctx('bruno.brach.inf24@stud.example.ch', 'Sehr geehrter Herr Brach')).salutation, 'Sehr geehrter Herr Brach');
 });

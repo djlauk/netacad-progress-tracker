@@ -1,7 +1,7 @@
 import { html } from 'hono/html';
 import type { Course, Person } from '../logic/model.ts';
 import type { CourseState, PersonState } from '../logic/status.ts';
-import type { Flag } from '../types.ts';
+import type { Flag, LearnerNotes } from '../types.ts';
 import { STATUS_META, fillTemplate, firstName, fmtDate, fmtNum, fmtPct } from './format.ts';
 import type { Html } from './layout.ts';
 
@@ -11,19 +11,23 @@ export type TemplateContext = {
   state: PersonState;
   course: Course;
   cs: CourseState;
+  notes: Pick<LearnerNotes, 'salutation'>;
   courseName: (courseKey: string) => string;
 };
 
 const flag = (f: Flag) => (f === true ? 'ja' : f === false ? 'nein' : f ?? '–');
 const list = (xs: string[]) => (xs.length ? xs.join(', ') : '–');
 
-function lastName(name: string): string {
+export function lastName(name: string): string {
   const i = name.indexOf(',');
   return i >= 0 ? name.slice(0, i).trim() : '';
 }
 
 /** Stands out in the mail text so it gets fixed up by hand. */
 export const NO_ACTIVITY = '-- noch keine Aktivität --';
+
+/** Stands out in the mail text until a salutation is set for the person. */
+export const NO_SALUTATION = '-- Anrede fehlt --';
 
 type Placeholder = { key: string; label: string; value: (c: TemplateContext) => string };
 
@@ -32,6 +36,7 @@ export const PLACEHOLDERS: { group: string; items: Placeholder[] }[] = [
   {
     group: 'Person',
     items: [
+      { key: 'salutation', label: 'Anrede dieser Person (auf der Personenseite erfasst)', value: (c) => c.notes.salutation || NO_SALUTATION },
       { key: 'firstName', label: 'Vorname (Teil des Namens nach dem Komma)', value: (c) => firstName(c.person.name) },
       { key: 'lastName', label: 'Nachname (Teil vor dem Komma)', value: (c) => lastName(c.person.name) },
       { key: 'name', label: 'voller Name laut NetAcad («Nachname, Vorname»)', value: (c) => c.person.name },

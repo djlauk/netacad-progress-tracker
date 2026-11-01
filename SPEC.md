@@ -226,6 +226,7 @@ Der Server hält das berechnete Modell im Speicher. Neu berechnet wird nach eine
   "learners": {
     "a.beispielchen.inf24@stud.bbbaden.ch": {
       "note": "Will JSE bis Ende Semester abschliessen.",
+      "salutation": "Sehr geehrte Frau Beispielchen",
       "contacts": [
         { "id": "c_01", "date": "2026-11-01", "channel": "E-Mail", "text": "Nachgefragt, ob Hilfe nötig", "reply": "Hat Prüfungsphase, macht ab Dezember weiter" }
       ],
@@ -236,6 +237,7 @@ Der Server hält das berechnete Modell im Speicher. Neu berechnet wird nach eine
 ```
 
 - Schlüssel: E-Mail in Kleinbuchstaben.
+- `salutation`: Anrede für die Nachfrage-Vorlage (Platzhalter `{salutation}`), freier Text in beliebiger Sprache, z. B. «Sehr geehrter Herr Muster» oder «Dear Ms Smith». Leer = nicht erfasst.
 - `snoozeUntil`: Bis zu diesem Datum gilt die Person nicht als «nachfragen». Sie wird mit einem Hinweis angezeigt.
 - `channel`: freier Text mit Vorschlägen (`E-Mail`, `Teams`, `persönlich`).
 - Schreiben: serialisiert (eine Warteschlange, keine parallelen Schreibvorgänge), atomar (temporäre Datei + `rename`). Vorher die bestehende Datei nach `notes.backup.json` kopieren (eine Generation).
@@ -320,7 +322,7 @@ Pro Kurs auf Basis des neuesten Snapshots:
 
 ### 7.0 Grundsätze für htmx
 
-- Jede Route liefert eine **vollständige Seite**. Routen, deren Inhalt htmx an Ort und Stelle ersetzt, liefern bei Header `HX-Request` nur das betroffene Fragment: Personenübersicht (Ergebnisse + Sortierzustand per `hx-swap-oob`), Kontakte, Notiz, Upload, Import-Vorschau und -Commit, Einstellungen. Ausnahme: Anfragen mit `HX-Boosted` oder `HX-History-Restore-Request` erhalten immer die ganze Seite. Die übrigen Seiten (Personendetail, Kurse, Zeitachse, Dateien, `GET /import`, `/`) liefern immer die ganze Seite; sie werden nur über `hx-boost` erreicht. Links und Formulare funktionieren so auch ohne JavaScript.
+- Jede Route liefert eine **vollständige Seite**. Routen, deren Inhalt htmx an Ort und Stelle ersetzt, liefern bei Header `HX-Request` nur das betroffene Fragment: Personenübersicht (Ergebnisse + Sortierzustand per `hx-swap-oob`), Kontakte, Notiz, Anrede (Nachfrage-Vorlage), Upload, Import-Vorschau und -Commit, Einstellungen. Ausnahme: Anfragen mit `HX-Boosted` oder `HX-History-Restore-Request` erhalten immer die ganze Seite. Die übrigen Seiten (Personendetail, Kurse, Zeitachse, Dateien, `GET /import`, `/`) liefern immer die ganze Seite; sie werden nur über `hx-boost` erreicht. Links und Formulare funktionieren so auch ohne JavaScript.
 - `hx-boost` auf der Navigation. Filter und Sortierung über `hx-get` mit `hx-push-url="true"`, damit gefilterte Ansichten verlinkbar und mit «Zurück» erreichbar bleiben. Der Zustand steht in den Query-Parametern.
 - **Kein `hx-on`** und keine Inline-Skripte (wegen der CSP, siehe 9). htmx-Konfiguration per `<meta name="htmx-config" content='{"allowEval":false,"includeIndicatorStyles":false,"historyCacheSize":0}'>`. `historyCacheSize: 0`, damit htmx keine Seitenkopien (mit Personendaten) im `localStorage` ablegt.
 - Pico-Klassen und semantisches HTML verwenden. Eigene Klassen nur in `app.css`.
@@ -335,6 +337,7 @@ Pro Kurs auf Basis des neuesten Snapshots:
 | POST     | `/people/:id/contacts`             | Kontakt erfassen → Fragment Kontaktliste                            |
 | POST     | `/people/:id/contacts/:cid/delete` | Kontakt löschen                                                     |
 | POST     | `/people/:id/note`                 | Notiz und `snoozeUntil` speichern                                   |
+| POST     | `/people/:id/salutation`           | Anrede speichern; Fragment: Nachfrage-Vorlage neu                   |
 | GET      | `/courses`                         | C. Kursübersicht                                                    |
 | GET      | `/courses/:id`                     | C. Kursdetail                                                       |
 | GET      | `/timeline`                        | D. Zeitachse (optional)                                             |
@@ -370,19 +373,20 @@ Eine Zeile pro Person. Spalten:
 - Kopf: Name, E-Mail, Status, letzte Aktivität.
 - **Pro Kurs:** Verlaufsdiagramm `classGrade` (SVG; x-Achse proportional zur Zeit, nicht nach Index; abgegebene Prüfungen als Marker) und eine Liste der Prüfungen mit Punkten und `submittedOn`.
 - **Kontaktprotokoll:** Liste und Formular (Datum mit heute vorbelegt, Kanal, Text, Antwort). Notizfeld. «Pausieren bis» (`snoozeUntil`). Speichern per htmx, ohne Neuladen der Seite.
-- **Nachfrage-Vorlage** aus `contactSubject` (Betreff) und `contactTemplate` (Text), beide mit Platzhaltern (siehe unten). Anzeige in einem schreibgeschützten Eingabefeld (Betreff, Knopf «Betreff kopieren») und einem schreibgeschützten Textfeld (Text, Knopf «Text kopieren»), dazu ein `mailto:`-Link an diese Person (Betreff als `subject`, Text als `body`). Standardbetreff: «NetAcad: {course}». Standardtext:
+- **Nachfrage-Vorlage** aus `contactSubject` (Betreff) und `contactTemplate` (Text), beide mit Platzhaltern (siehe unten). Darüber ein Feld «Anrede» mit Knopf «Anrede speichern» (per htmx; die Vorlage wird danach neu angezeigt). Anzeige in einem schreibgeschützten Eingabefeld (Betreff, Knopf «Betreff kopieren») und einem schreibgeschützten Textfeld (Text, Knopf «Text kopieren»), dazu ein `mailto:`-Link an diese Person (Betreff als `subject`, Text als `body`). Standardbetreff: «NetAcad: {course}». Standardtext:
 
-  > Guten Tag, Herr/Frau {lastName},
+  > {salutation},
   >
   > ich sehe im Kurs «{course}», dass sich seit dem {lastActivity} nichts mehr getan hat. Ist gerade einfach viel los, oder kann ich Ihnen irgendwo helfen? Melden Sie sich gern, auch wenn Sie nur eine kurze Frage haben.
 
-  Höflichkeitsform mit Nachnamen. Das Geschlecht ist in den Daten nicht enthalten, deshalb «Herr/Frau»; die Lehrperson passt die Anrede vor dem Senden an.
+  Das Geschlecht ist in den NetAcad-Daten nicht enthalten. Deshalb wird die Anrede pro Person erfasst. Fehlt sie, ergibt `{salutation}` den auffälligen Text `-- Anrede fehlt --`.
 
   Platzhalter mit englischen Namen, gleich wie die Felder der Snapshot-Dateien, wo es ein solches Feld gibt. Kursbezogene Werte gelten für den **Kurs mit der längsten Inaktivität** (unter den aktuellen, nicht abgeschlossenen Kursen der Person; gibt es keinen, unter allen). Fehlende Werte: «–». Flags: «ja» / «nein» / Rohtext aus NetAcad. Unbekannte Platzhalter bleiben unverändert stehen. Im Betreff werden Zeilenumbrüche zu Leerzeichen. Definiert an einer Stelle (`views/template.ts`); dieselbe Liste erscheint als Hilfe unter den Feldern in den Einstellungen.
 
   | Platzhalter            | Wert                                                                |
   | ---------------------- | ------------------------------------------------------------------- |
   | **Person**             |                                                                     |
+  | `{salutation}`         | Anrede dieser Person (`notes.json`), sonst `-- Anrede fehlt --`     |
   | `{firstName}`          | Teil des Namens nach dem Komma (ohne Komma: ganzer Name)            |
   | `{lastName}`           | Teil des Namens vor dem Komma                                       |
   | `{name}`               | voller Name laut NetAcad («Nachname, Vorname»)                      |

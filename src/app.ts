@@ -10,7 +10,7 @@ import { buildBookmarklet } from './logic/bookmarklet.ts';
 import { isIsoDate, parseSnapshotText } from './logic/parse.ts';
 import { previewSnapshot } from './logic/preview.ts';
 import { personState, timeline } from './logic/status.ts';
-import { createNotesStore } from './store/notes.ts';
+import { createNotesStore, emptyLearnerNotes } from './store/notes.ts';
 import { createSettingsStore, validateSettings } from './store/settings.ts';
 import { createSnapshotStore, type SaveResult } from './store/snapshots.ts';
 import { coursePage, coursesPage, timelinePage } from './views/courses.ts';
@@ -18,7 +18,7 @@ import { filesPage } from './views/files.ts';
 import { commitResult, importPage, previewFragment, type PreviewItem } from './views/import.ts';
 import { layout, type Html, type NavKey } from './views/layout.ts';
 import { buildRows, emptyPage, parsePeopleQuery, peoplePage, results, sortState } from './views/people.ts';
-import { contactsSection, noteSection, personPage } from './views/person.ts';
+import { contactsSection, noteSection, personPage, templateSection } from './views/person.ts';
 import { settingsPage, toForm, type SettingsForm } from './views/settings.ts';
 
 export type AppOptions = {
@@ -184,7 +184,7 @@ export function createApp(opts: AppOptions) {
     const { model, settings, notes, today: t } = await load();
     const p = model.personById.get(c.req.param('id'));
     if (!p) return notFound(c, 'Person');
-    const ln = notes.learners[p.key] ?? { note: '', contacts: [], snoozeUntil: null };
+    const ln = notes.learners[p.key] ?? emptyLearnerNotes();
     const st = personState(p, ln, settings, t);
     return page(c, p.name || 'Person', 'people', personPage(p, st, ln, model, settings, csrf, t));
   });
@@ -232,6 +232,17 @@ export function createApp(opts: AppOptions) {
     });
     if (isFragment(c)) return c.html(noteSection(p, ln, csrf, 'Gespeichert. Der Status wird beim nächsten Laden aktualisiert.'));
     return c.redirect(`/people/${p.id}`, 303);
+  });
+
+  app.post('/people/:id/salutation', async (c) => {
+    const { model, settings, today: t } = await load();
+    const p = model.personById.get(c.req.param('id'));
+    if (!p) return notFound(c, 'Person');
+    const body = await c.req.parseBody({ all: true });
+    const salutation = first(body.salutation).replace(/\s+/g, ' ').trim().slice(0, 200);
+    const ln = await notesStore.update(p.key, (n) => { n.salutation = salutation; });
+    if (isFragment(c)) return c.html(templateSection(p, personState(p, ln, settings, t), ln, model, settings, csrf, 'Anrede gespeichert.'));
+    return c.redirect(`/people/${p.id}#template`, 303);
   });
 
   app.get('/courses', async (c) => {

@@ -76,14 +76,14 @@ test('lower score → anomaly, not progress', () => {
 test('snoozeUntil in the future → snoozed', () => {
   const email = 'gina.pause.im26@stud.example.ch';
   assert.equal(state(email).status, 'alert');
-  assert.equal(state(email, { note: '', contacts: [], snoozeUntil: '2026-12-01' }).status, 'snoozed');
-  assert.equal(state(email, { note: '', contacts: [], snoozeUntil: '2026-10-31' }).status, 'alert');
+  assert.equal(state(email, { note: '', salutation: '', contacts: [], snoozeUntil: '2026-12-01' }).status, 'snoozed');
+  assert.equal(state(email, { note: '', salutation: '', contacts: [], snoozeUntil: '2026-10-31' }).status, 'alert');
 });
 
 test('completed; contacted since watch/alert began', () => {
   assert.equal(state('ida.fertig.im26@stud.example.ch').status, 'completed');
   const st = state('bruno.brach.inf24@stud.example.ch', {
-    note: '', snoozeUntil: null,
+    note: '', salutation: '', snoozeUntil: null,
     contacts: [{ id: 'c_1', date: '2026-10-30', channel: 'E-Mail', text: '', reply: '' }],
   });
   assert.equal(st.contactedOn, '2026-10-30');

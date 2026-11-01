@@ -154,6 +154,19 @@ test('note + snooze → snoozed', async () => {
   assert.match(page, /pausiert bis 01\.12\.2026/);
 });
 
+test('salutation saved per person, used in template', async () => {
+  const { post, get, dataDir } = setup();
+  const id = shortId('bruno.brach.inf24@stud.example.ch');
+  const r = await post(`/people/${id}/salutation`, new URLSearchParams({ salutation: '  Sehr geehrter   Herr Brach ' }), { 'HX-Request': 'true' });
+  assert.equal(r.status, 200);
+  const frag = await r.text();
+  assert.match(frag, /^<section id="template">/);
+  assert.match(frag, /Sehr geehrter Herr Brach,\n\nich sehe/);
+  const saved = JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8'));
+  assert.equal(saved.learners['bruno.brach.inf24@stud.example.ch'].salutation, 'Sehr geehrter Herr Brach');
+  assert.ok((await (await get(`/people/${id}`)).text()).includes('body=Sehr%20geehrter%20Herr%20Brach%2C%0A%0A'));
+});
+
 test('HX-Request → fragment, otherwise full page', async () => {
   const { get } = setup();
   const full = await (await get('/people')).text();
@@ -226,6 +239,6 @@ test('person page: subject from settings in field and mailto', async () => {
   const { get } = setup();
   const page = await (await get(`/people/${shortId('bruno.brach.inf24@stud.example.ch')}`)).text();
   assert.ok(page.includes('id="template-subject" type="text" value="NetAcad: JavaScript Essentials 1 2026/27"'));
-  assert.ok(page.includes('subject=NetAcad%3A%20JavaScript%20Essentials%201%202026%2F27&amp;body=Guten%20Tag%2C%20Herr%2FFrau%20Brach%2C%0A%0Aich%20sehe'));
+  assert.ok(page.includes('subject=NetAcad%3A%20JavaScript%20Essentials%201%202026%2F27&amp;body=--%20Anrede%20fehlt%20--%2C%0A%0Aich%20sehe'));
   assert.ok(page.includes('kann ich Ihnen irgendwo helfen?'));
 });

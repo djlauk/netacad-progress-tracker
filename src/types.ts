@@ -44,6 +44,8 @@ export type Contact = {
 
 export type LearnerNotes = {
   note: string;
+  /** Salutation for the contact template, e.g. «Sehr geehrter Herr Brach»; '' = not set. */
+  salutation: string;
   contacts: Contact[];
   snoozeUntil: string | null;
 };

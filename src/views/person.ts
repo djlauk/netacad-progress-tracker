@@ -4,7 +4,7 @@ import { compare, inactiveDays, type PersonState } from '../logic/status.ts';
 import type { LearnerNotes, Settings } from '../types.ts';
 import { gradeChart } from './charts.ts';
 import { fmtDate, fmtNum, fmtPct, LEVEL_META } from './format.ts';
-import { expandTemplate } from './template.ts';
+import { expandTemplate, lastName } from './template.ts';
 import { csrfField, type Html } from './layout.ts';
 import { activityCell, statusBadge, statusExtras } from './people.ts';
 
@@ -49,12 +49,12 @@ ${csrfField(csrf)}
 </section>`;
 }
 
-function templateSection(p: Person, st: PersonState, model: Model, settings: Settings): Html {
+export function templateSection(p: Person, st: PersonState, notes: LearnerNotes, model: Model, settings: Settings, csrf: string, msg?: string): Html {
   const pool = st.courses.filter((c) => c.inLatest && !c.completed);
   const cands = pool.length ? pool : st.courses;
   const worst = cands.reduce((m, c) => (inactiveDays(c.days) > inactiveDays(m.days) ? c : m), cands[0]);
   const course = model.courseByKey.get(worst.courseKey)!;
-  const ctx = { person: p, state: st, course, cs: worst, courseName: (k: string) => model.courseByKey.get(k)?.name ?? k };
+  const ctx = { person: p, state: st, course, cs: worst, notes, courseName: (k: string) => model.courseByKey.get(k)?.name ?? k };
   const subject = expandTemplate(settings.contactSubject, ctx).replace(/\s+/g, ' ').trim();
   const text = expandTemplate(settings.contactTemplate, ctx);
   const mailto = p.email
@@ -62,6 +62,12 @@ function templateSection(p: Person, st: PersonState, model: Model, settings: Set
     : null;
   return html`<section id="template">
 <h2>Nachfrage-Vorlage</h2>
+${msg ? html`<p class="msg msg-ok" role="status">${msg}</p>` : ''}
+<form method="post" action="/people/${p.id}/salutation" hx-post="/people/${p.id}/salutation" hx-target="#template" hx-swap="outerHTML" class="copy-row">
+${csrfField(csrf)}
+<input type="text" name="salutation" value="${notes.salutation}" maxlength="200" placeholder="Anrede, z. B. Sehr geehrter Herr ${lastName(p.name) || 'Muster'}" aria-label="Anrede">
+<button type="submit" class="secondary outline small">Anrede speichern</button>
+</form>
 <div class="copy-row"><input id="template-subject" type="text" value="${subject}" readonly aria-label="Betreff"><button type="button" class="secondary outline small" data-copy-target="#template-subject">Betreff kopieren</button></div>
 <textarea id="template-text" rows="6" readonly aria-label="Text">${text}</textarea>
 <div class="toolbar">
@@ -105,6 +111,6 @@ ${p.warnings.map((w) => html`<p class="msg msg-warn">${w}</p>`)}
 ${st.courses.map((c) => courseBlock(c, model))}
 <div class="grid two-col">
 <div>${contactsSection(p, notes, csrf, today)}</div>
-<div>${templateSection(p, st, model, settings)}${noteSection(p, notes, csrf)}</div>
+<div>${templateSection(p, st, notes, model, settings, csrf)}${noteSection(p, notes, csrf)}</div>
 </div>`;
 }
