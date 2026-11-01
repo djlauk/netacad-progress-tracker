@@ -26,7 +26,7 @@ export function layout(opts: { title: string; nav: NavKey; csrf: string; content
 <title>${opts.title} · NetAcad-Fortschritt</title>
 <link rel="stylesheet" href="/vendor/pico.min.css">
 <link rel="stylesheet" href="/static/app.css">
-<link rel="icon" href="data:,">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230172ad'/><path fill='%23fff' d='M6 20h5v6H6zM13.5 13h5v13h-5zM21 6h5v20h-5z'/></svg>">
 <script src="/vendor/htmx.min.js" defer></script>
 <script src="/static/app.js" defer></script>
 </head>
