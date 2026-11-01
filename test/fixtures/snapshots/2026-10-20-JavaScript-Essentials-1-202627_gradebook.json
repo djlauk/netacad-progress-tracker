@@ -1,0 +1,208 @@
+{
+  "format": "netacad-gradebook/1",
+  "snapshotDate": "2026-10-20",
+  "exportedAt": "2026-10-20T06:00:00.000Z",
+  "course": "JavaScript Essentials 1 2026/27",
+  "url": "/learning/course/AAA111/gradebook",
+  "courseId": "b68f5a66-bdb0-41d3-8788-65776afbf9ee",
+  "assessments": [
+    {
+      "name": "JSE: Module 1: Module Exam",
+      "dueDate": "2027-07-31"
+    },
+    {
+      "name": "JSE: Module 2: Module Exam",
+      "dueDate": "2027-07-31"
+    },
+    {
+      "name": "JSE: Module 3: Module Exam",
+      "dueDate": "2027-07-31"
+    },
+    {
+      "name": "JSE: Module 4: Module Exam",
+      "dueDate": "2027-07-31"
+    }
+  ],
+  "learners": [
+    {
+      "name": "Aktiv, Anna",
+      "email": "anna.aktiv.inf24@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 21.25,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "JSE: Module 1: Module Exam",
+          "score": 85,
+          "maxScore": 100,
+          "submittedOn": "2026-09-05"
+        },
+        {
+          "name": "JSE: Module 2: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 3: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 4: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Brach, Bruno",
+      "email": "bruno.brach.inf24@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 19.75,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "JSE: Module 1: Module Exam",
+          "score": 79,
+          "maxScore": 100,
+          "submittedOn": "2026-08-28"
+        },
+        {
+          "name": "JSE: Module 2: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 3: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 4: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Doppel, David",
+      "email": "david.doppel.inf24@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 17.5,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "JSE: Module 1: Module Exam",
+          "score": 70,
+          "maxScore": 100,
+          "submittedOn": "2026-09-20"
+        },
+        {
+          "name": "JSE: Module 2: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 3: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 4: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Weg, Eva",
+      "email": "eva.weg.im26@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 15,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "JSE: Module 1: Module Exam",
+          "score": 60,
+          "maxScore": 100,
+          "submittedOn": "2026-09-03"
+        },
+        {
+          "name": "JSE: Module 2: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 3: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 4: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Pause, Gina",
+      "email": "gina.pause.im26@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 12.5,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "JSE: Module 1: Module Exam",
+          "score": 50,
+          "maxScore": 100,
+          "submittedOn": "2026-09-02"
+        },
+        {
+          "name": "JSE: Module 2: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 3: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "JSE: Module 4: Module Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    }
+  ]
+}

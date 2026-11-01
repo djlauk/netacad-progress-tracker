@@ -1,0 +1,113 @@
+/* Adjustments on top of Pico CSS. Colours as custom properties for light and dark. */
+:root {
+  --pico-font-size: 93.75%;
+  --c-up: #1a7f37; --c-down: #b3261e; --c-muted: #6b7280;
+  --c-alert-bg: #fde8e7; --c-watch-bg: #fff4d6; --c-active-bg: #e3f5e8; --c-new-bg: #e5effd;
+  --c-neutral-bg: #eceff3; --c-warn-bg: #fff4d6; --c-error-bg: #fde8e7; --c-ok-bg: #e3f5e8; --c-info-bg: #e5effd;
+  --c-chart-line: #1d6fd8; --c-chart-marker: #d97706; --c-chart-grid: #d5dae1; --c-chart-text: #5b6472;
+  --c-bar: #1d6fd8; --c-bar-bg: #e6e9ee;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-up: #4ac26b; --c-down: #ff7b72; --c-muted: #9aa3af;
+    --c-alert-bg: #4a1f1d; --c-watch-bg: #463a14; --c-active-bg: #1b3a25; --c-new-bg: #1c2f4d;
+    --c-neutral-bg: #2a2f37; --c-warn-bg: #463a14; --c-error-bg: #4a1f1d; --c-ok-bg: #1b3a25; --c-info-bg: #1c2f4d;
+    --c-chart-line: #6aa8ff; --c-chart-marker: #f0a640; --c-chart-grid: #3a414c; --c-chart-text: #a7b0bd;
+    --c-bar: #6aa8ff; --c-bar-bg: #2a2f37;
+  }
+}
+
+.site-header nav { border-bottom: 1px solid var(--pico-muted-border-color); }
+.site-header .brand { color: inherit; }
+.site-footer { color: var(--c-muted); padding-top: 1rem; }
+.page-head { margin-bottom: 1rem; }
+.muted, .muted td { color: var(--c-muted); }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.pre { white-space: pre-wrap; }
+button.small, [role=button].small, .small { padding: .25rem .6rem; font-size: .85em; }
+small.extra { display: block; color: var(--c-muted); }
+small.email { color: var(--c-muted); }
+.copy-row { display: flex; gap: .5rem; align-items: start; }
+.copy-row input { flex: 1; }
+
+/* Compact tables, horizontal scroll, sticky first column */
+.table-scroll { overflow-x: auto; margin-bottom: var(--pico-spacing); }
+table.compact { font-size: .9em; margin-bottom: 0; }
+table.compact th, table.compact td { padding: .35rem .5rem; vertical-align: top; }
+table.compact th { white-space: nowrap; }
+table.compact th a { text-decoration: none; }
+.sticky { position: sticky; left: 0; z-index: 1; background: var(--pico-background-color); }
+th.course-col { max-width: 12rem; white-space: normal; }
+td.num, th.assess-col { text-align: right; }
+.course-cell { white-space: nowrap; }
+.course-cell .grade { font-weight: 600; }
+.course-cell.level-watch { background: var(--c-watch-bg); }
+.course-cell.level-alert { background: var(--c-alert-bg); }
+.course-cell.level-gone { color: var(--c-muted); }
+.delta-up { color: var(--c-up); font-weight: 600; }
+.delta-down { color: var(--c-down); font-weight: 600; }
+.delta-zero { color: var(--c-muted); }
+.anomaly { color: var(--c-down); }
+
+/* Status badges: always icon + text */
+.badge { display: inline-block; padding: .1rem .5rem; border-radius: 1rem; font-size: .85em; white-space: nowrap; background: var(--c-neutral-bg); }
+.badge-alert { background: var(--c-alert-bg); }
+.badge-watch { background: var(--c-watch-bg); }
+.badge-active, .badge-completed, .badge-file-ok { background: var(--c-active-bg); }
+.badge-new { background: var(--c-new-bg); }
+.badge-file-invalid { background: var(--c-error-bg); }
+.counters a { text-decoration: none; }
+.counters { font-size: 1.1em; }
+
+/* Filters */
+.filters { margin-bottom: 1rem; }
+.status-filter { display: flex; flex-wrap: wrap; gap: .25rem 1rem; }
+.status-filter label { margin: 0; }
+.filter-row { display: flex; flex-wrap: wrap; gap: 0 1rem; align-items: end; }
+.filter-row label { flex: 1 1 12rem; }
+.filter-row button { flex: 0 0 auto; }
+.toolbar { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; margin-bottom: .75rem; }
+.toolbar > * { margin-bottom: 0; }
+
+/* Messages */
+.msg { padding: .5rem .75rem; border-radius: var(--pico-border-radius); margin-bottom: .5rem; }
+.msg-error { background: var(--c-error-bg); }
+.msg-warn { background: var(--c-warn-bg); }
+.msg-ok { background: var(--c-ok-bg); }
+.msg-info { background: var(--c-info-bg); }
+
+/* Layout */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(22rem, 1fr)); gap: 1rem; }
+.two-col { grid-template-columns: 1fr 1fr; align-items: start; }
+.course-block header p { margin-bottom: 0; }
+.facts { display: grid; grid-template-columns: max-content 1fr; gap: .25rem 1rem; }
+.facts dd { margin: 0; }
+.placeholders { font-size: .85em; margin-bottom: var(--pico-spacing); }
+.placeholders .facts { margin-bottom: .5rem; }
+.dropzone { display: block; border: 2px dashed var(--pico-muted-border-color); border-radius: var(--pico-border-radius); padding: 1rem; }
+.dropzone.dragover { border-color: var(--pico-primary); background: var(--c-info-bg); }
+.timeline { list-style: none; padding: 0; }
+.timeline li { padding: .2rem 0; border-bottom: 1px solid var(--pico-muted-border-color); list-style: none; }
+.bookmarklet { font-weight: 600; padding: .2rem .6rem; border: 1px dashed var(--pico-primary); border-radius: var(--pico-border-radius); }
+
+/* Charts */
+.chart { width: 100%; max-width: 48rem; height: auto; display: block; }
+.chart-line { stroke: var(--c-chart-line); stroke-width: 2.5; }
+.chart-point { fill: var(--c-chart-line); }
+.chart-marker line { stroke: var(--c-chart-marker); stroke-width: 1; stroke-dasharray: 2 3; }
+.chart-marker rect { fill: var(--c-chart-marker); }
+.chart-grid { stroke: var(--c-chart-grid); stroke-width: 1; }
+.chart-label { fill: var(--c-chart-text); font-size: 11px; }
+.chart-legend { margin-bottom: .5rem; }
+.legend-line, .legend-marker { display: inline-block; width: 1rem; height: .6rem; vertical-align: middle; }
+.legend-line { border-top: 3px solid var(--c-chart-line); height: 0; }
+.legend-marker { width: .6rem; background: var(--c-chart-marker); }
+.bar-bg { fill: var(--c-bar-bg); }
+.bar-fg { fill: var(--c-bar); }
+
+@media print {
+  .site-header, .site-footer, .filters, .toolbar button, .hint { display: none; }
+  .table-scroll { overflow: visible; }
+  .course-cell.level-watch, .course-cell.level-alert, .badge { background: none; border: 1px solid #999; }
+  a { text-decoration: none; color: inherit; }
+}

@@ -1,0 +1,174 @@
+{
+  "format": "netacad-gradebook/1",
+  "snapshotDate": "2026-10-25",
+  "exportedAt": "2026-10-25T08:00:00.000Z",
+  "course": "Networking Basics 2026/27",
+  "url": "/learning/course/BBB222/gradebook",
+  "courseId": "fc60568b-7bad-4fb3-9b4c-22f735042a79",
+  "assessments": [
+    {
+      "name": "NB: Module 1: Checkpoint Exam",
+      "dueDate": "2027-07-31"
+    },
+    {
+      "name": "NB: Module 2: Checkpoint Exam",
+      "dueDate": "2027-07-31"
+    },
+    {
+      "name": "NB: Module 3: Checkpoint Exam",
+      "dueDate": "2027-07-31"
+    }
+  ],
+  "learners": [
+    {
+      "name": "Aktiv, Anna",
+      "email": "anna.aktiv.inf24@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 25,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "NB: Module 1: Checkpoint Exam",
+          "score": 75,
+          "maxScore": 100,
+          "submittedOn": "2026-10-01"
+        },
+        {
+          "name": "NB: Module 2: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "NB: Module 3: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Leer, Carla",
+      "email": "carla.leer.im26@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 0,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "NB: Module 1: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "NB: Module 2: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "NB: Module 3: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Fallend, Felix",
+      "email": "felix.fallend.inf24@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 20,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "NB: Module 1: Checkpoint Exam",
+          "score": 60,
+          "maxScore": 100,
+          "submittedOn": "2026-09-10"
+        },
+        {
+          "name": "NB: Module 2: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "NB: Module 3: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Neu, Hans",
+      "email": "hans.neu.inf24@stud.example.ch",
+      "status": "IN PROGRESS",
+      "classGrade": 0,
+      "finalExamScore": null,
+      "finalExamSubmitted": false,
+      "surveySubmitted": false,
+      "markedComplete": false,
+      "assessments": [
+        {
+          "name": "NB: Module 1: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "NB: Module 2: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        },
+        {
+          "name": "NB: Module 3: Checkpoint Exam",
+          "score": null,
+          "maxScore": 100,
+          "submittedOn": null
+        }
+      ]
+    },
+    {
+      "name": "Fertig, Ida",
+      "email": "ida.fertig.im26@stud.example.ch",
+      "status": "COMPLETED",
+      "classGrade": 92.33,
+      "finalExamScore": null,
+      "finalExamSubmitted": true,
+      "surveySubmitted": true,
+      "markedComplete": true,
+      "assessments": [
+        {
+          "name": "NB: Module 1: Checkpoint Exam",
+          "score": 90,
+          "maxScore": 100,
+          "submittedOn": "2026-09-13"
+        },
+        {
+          "name": "NB: Module 2: Checkpoint Exam",
+          "score": 95,
+          "maxScore": 100,
+          "submittedOn": "2026-10-10"
+        },
+        {
+          "name": "NB: Module 3: Checkpoint Exam",
+          "score": 92,
+          "maxScore": 100,
+          "submittedOn": "2026-10-22"
+        }
+      ]
+    }
+  ]
+}
