@@ -335,6 +335,7 @@ Pro Kurs auf Basis des neuesten Snapshots:
 | GET      | `/people`                          | A. Personenübersicht. Query: `status`, `course`, `q`, `sort`, `dir` |
 | GET      | `/people/:id`                      | B. Personendetail                                                   |
 | POST     | `/people/:id/contacts`             | Kontakt erfassen → Fragment Kontaktliste                            |
+| POST     | `/people/:id/contacts/:cid/reply`  | Antwort nachtragen/ändern → Fragment Kontaktliste                   |
 | POST     | `/people/:id/contacts/:cid/delete` | Kontakt löschen                                                     |
 | POST     | `/people/:id/note`                 | Notiz und `snoozeUntil` speichern                                   |
 | POST     | `/people/:id/salutation`           | Anrede speichern; Fragment: Nachfrage-Vorlage neu                   |
@@ -372,7 +373,7 @@ Eine Zeile pro Person. Spalten:
 
 - Kopf: Name, E-Mail, Status, letzte Aktivität.
 - **Pro Kurs:** Verlaufsdiagramm `classGrade` (SVG; x-Achse proportional zur Zeit, nicht nach Index; abgegebene Prüfungen als Marker) und eine Liste der Prüfungen mit Punkten und `submittedOn`.
-- **Kontaktprotokoll:** Liste und Formular (Datum mit heute vorbelegt, Kanal, Text, Antwort). Notizfeld. «Pausieren bis» (`snoozeUntil`). Speichern per htmx, ohne Neuladen der Seite.
+- **Kontaktprotokoll:** Liste und Formular (Datum mit heute vorbelegt, Kanal, Text, Antwort). Die Antwort lässt sich pro Kontakt nachträglich erfassen oder ändern, da Antworten per E-Mail oft erst Tage später eintreffen. Notizfeld. «Pausieren bis» (`snoozeUntil`). Speichern per htmx, ohne Neuladen der Seite.
 - **Nachfrage-Vorlage** aus `contactSubject` (Betreff) und `contactTemplate` (Text), beide mit Platzhaltern (siehe unten). Darüber ein Feld «Anrede» mit Knopf «Anrede speichern» (per htmx; die Vorlage wird danach neu angezeigt). Anzeige in einem schreibgeschützten Eingabefeld (Betreff, Knopf «Betreff kopieren») und einem schreibgeschützten Textfeld (Text, Knopf «Text kopieren»), dazu ein `mailto:`-Link an diese Person (Betreff als `subject`, Text als `body`). Standardbetreff: «NetAcad: {course}». Standardtext:
 
   > {salutation},

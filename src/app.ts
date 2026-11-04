@@ -209,6 +209,21 @@ export function createApp(opts: AppOptions) {
     return c.redirect(`/people/${p.id}#contacts`, 303);
   });
 
+  app.post('/people/:id/contacts/:cid/reply', async (c) => {
+    const { model, notes, today: t } = await load();
+    const p = model.personById.get(c.req.param('id'));
+    if (!p) return notFound(c, 'Person');
+    const cid = c.req.param('cid');
+    if (!(notes.learners[p.key]?.contacts ?? []).some((x) => x.id === cid)) return notFound(c, 'Kontakt');
+    const body = await c.req.parseBody({ all: true });
+    const reply = first(body.reply).trim().slice(0, 5000);
+    const ln = await notesStore.update(p.key, (n) => {
+      for (const x of n.contacts) if (x.id === cid) x.reply = reply;
+    });
+    if (isFragment(c)) return c.html(contactsSection(p, ln, csrf, t, 'Antwort gespeichert.'));
+    return c.redirect(`/people/${p.id}#contacts`, 303);
+  });
+
   app.post('/people/:id/contacts/:cid/delete', async (c) => {
     const { model, today: t } = await load();
     const p = model.personById.get(c.req.param('id'));

@@ -144,6 +144,30 @@ test('add contact → notes.json, backup created; delete contact', async () => {
   assert.equal(after.learners['bruno.brach.inf24@stud.example.ch'].contacts.length, 1);
 });
 
+test('reply added later to an existing contact', async () => {
+  const { post, dataDir } = setup();
+  const key = 'bruno.brach.inf24@stud.example.ch';
+  const id = shortId(key);
+  await post(`/people/${id}/contacts`, new URLSearchParams({ date: '2026-11-01', text: 'Nachgefragt' }));
+  const read = () => JSON.parse(fs.readFileSync(path.join(dataDir, 'notes.json'), 'utf8')).learners[key].contacts;
+  const cid = read()[0].id;
+  assert.equal(read()[0].reply, '');
+
+  const r = await post(`/people/${id}/contacts/${cid}/reply`, new URLSearchParams({ reply: '  Bin dran, danke!  ' }), { 'HX-Request': 'true' });
+  assert.equal(r.status, 200);
+  const frag = await r.text();
+  assert.match(frag, /Antwort gespeichert/);
+  assert.match(frag, /Bin dran, danke!/);
+  assert.match(frag, /Antwort bearbeiten/);
+  const c = read();
+  assert.equal(c.length, 1);
+  assert.equal(c[0].reply, 'Bin dran, danke!');
+  assert.equal(c[0].text, 'Nachgefragt');
+
+  const missing = await post(`/people/${id}/contacts/c_nope/reply`, new URLSearchParams({ reply: 'x' }));
+  assert.equal(missing.status, 404);
+});
+
 test('note + snooze → snoozed', async () => {
   const { post, get } = setup();
   const id = shortId('gina.pause.im26@stud.example.ch');

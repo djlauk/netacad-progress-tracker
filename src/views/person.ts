@@ -1,7 +1,7 @@
 import { html } from 'hono/html';
 import type { Model, Person } from '../logic/model.ts';
 import { compare, type PersonState } from '../logic/status.ts';
-import type { LearnerNotes, Settings } from '../types.ts';
+import type { Contact, LearnerNotes, Settings } from '../types.ts';
 import { gradeChart } from './charts.ts';
 import { fmtDate, fmtNum, fmtPct, LEVEL_META } from './format.ts';
 import { expandTemplate, lastName, templateCourse } from './template.ts';
@@ -10,13 +10,24 @@ import { activityCell, statusBadge, statusExtras } from './people.ts';
 
 const CHANNELS = ['E-Mail', 'Teams', 'persönlich'];
 
+function replyCell(p: Person, c: Contact, csrf: string): Html {
+  return html`${c.reply ? html`<span class="pre">${c.reply}</span>` : ''}
+<details class="reply-edit"><summary class="small">${c.reply ? 'Antwort bearbeiten' : 'Antwort erfassen'}</summary>
+<form method="post" action="/people/${p.id}/contacts/${c.id}/reply" hx-post="/people/${p.id}/contacts/${c.id}/reply" hx-target="#contacts" hx-swap="outerHTML">
+${csrfField(csrf)}
+<textarea name="reply" rows="2" maxlength="5000" aria-label="Antwort">${c.reply}</textarea>
+<button type="submit" class="small">Antwort speichern</button>
+</form>
+</details>`;
+}
+
 export function contactsSection(p: Person, notes: LearnerNotes, csrf: string, today: string, msg?: string): Html {
   const list = [...notes.contacts].reverse();
   return html`<section id="contacts">
 <h2>Kontaktprotokoll</h2>
 ${msg ? html`<p class="msg msg-ok" role="status">${msg}</p>` : ''}
 ${list.length ? html`<div class="table-scroll"><table class="compact striped"><thead><tr><th>Datum</th><th>Kanal</th><th>Text</th><th>Antwort</th><th></th></tr></thead><tbody>
-${list.map((c) => html`<tr><td>${fmtDate(c.date)}</td><td>${c.channel}</td><td class="pre">${c.text}</td><td class="pre">${c.reply}</td><td>
+${list.map((c) => html`<tr><td>${fmtDate(c.date)}</td><td>${c.channel}</td><td class="pre">${c.text}</td><td>${replyCell(p, c, csrf)}</td><td>
 <form method="post" action="/people/${p.id}/contacts/${c.id}/delete" hx-post="/people/${p.id}/contacts/${c.id}/delete" hx-target="#contacts" hx-swap="outerHTML" hx-confirm="Diesen Kontakt löschen?">${csrfField(csrf)}<button type="submit" class="secondary outline small" title="Kontakt löschen">Löschen</button></form>
 </td></tr>`)}
 </tbody></table></div>` : html`<p class="muted">Noch keine Kontakte erfasst.</p>`}
