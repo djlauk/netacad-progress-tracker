@@ -22,13 +22,12 @@ npm start            # → http://localhost:8765/  -- Port siehe Umgebungsvariab
 | `npm run dev:demo`    | Mit fiktiven Demo-Daten starten (`test/fixtures/demo`, Daten auf heute verschoben) |
 | `npm test`            | Tests                                                                              |
 | `npm run typecheck`   | Typprüfung (`tsc --noEmit`)                                                        |
-| `npm run bookmarklet` | `bookmarklet/bookmarklet.txt` aus `bookmarklet.src.js` erzeugen                    |
 
 ### Umgebungsvariablen
 
 | Variable | Standard | Bemerkung |
 |---|---|---|
-| `PORT` | `8765` | Nach einer Änderung von `PORT` muss das Bookmarklet neu erzeugt (`npm run bookmarklet`) und neu in die Lesezeichenleiste gezogen werden.|
+| `PORT` | `8765` | Das Bookmarklet enthält den Port. Nach einer Änderung von `PORT` das alte Lesezeichen löschen und den Link unter **Einstellungen → Bookmarklet** neu in die Lesezeichenleiste ziehen. |
 | `DATA_DIR` | `./data` | |
 | `SOURCE_ORIGINS` | `https://www.netacad.com` | kommagetrennt; andere Herkunft erzeugt beim Import eine Warnung. |
 
@@ -36,7 +35,7 @@ npm start            # → http://localhost:8765/  -- Port siehe Umgebungsvariab
 ## Bookmarklet einrichten
 
 1. Server starten, **Einstellungen → Bookmarklet** öffnen.
-2. Den Link «NetAcad → Fortschritt» in die Lesezeichenleiste ziehen. Alternativ «Code kopieren» und als Adresse eines neuen Lesezeichens einfügen.
+2. Den Link «NetAcad → Fortschritt (:8765)» in die Lesezeichenleiste ziehen. Der Name zeigt den Port, für den das Bookmarklet erzeugt wurde. Alternativ «Code kopieren» und als Adresse eines neuen Lesezeichens einfügen.
 
 ## Ablauf: exportieren → importieren → nachfragen
 
@@ -66,7 +65,7 @@ data/
 
 - **Das Gradebook zeigt nur Prüfungsergebnisse.** Wer Module durcharbeitet, ohne die Prüfung abzulegen, erscheint als inaktiv. «Kein Fortschritt» heisst «keine Prüfung abgelegt». Das ist ein Anlass für eine freundliche Nachfrage, kein Beweis für Untätigkeit.
 - Das Bookmarklet erfasst nur die Zeilen, die auf der Gradebook-Seite sichtbar sind (Paginierung). Bei deutlich weniger Lernenden als zuvor warnt die Vorschau.
-- Das Bookmarklet hängt vom HTML-Aufbau der NetAcad-Seite ab und muss nach Änderungen bei Cisco eventuell angepasst werden (`bookmarklet/bookmarklet.src.js`, dann `npm run bookmarklet`).
+- Das Bookmarklet hängt vom HTML-Aufbau der NetAcad-Seite ab und muss nach Änderungen bei Cisco eventuell angepasst werden (`bookmarklet/bookmarklet.src.js` anpassen, danach den Link neu in die Lesezeichenleiste ziehen).
 - Die Werte von `status` ausser `IN PROGRESS` und die Beschriftung erledigter Häkchen (vermutlich `"Yes"`) sind noch nicht belegt.
 - Ob NetAcad das Öffnen eines neuen Tabs aus dem Bookmarklet zulässt, ist noch nicht in der Praxis geprüft. Der Download-Fallback bleibt deshalb erhalten.
 

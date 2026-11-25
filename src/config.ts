@@ -8,7 +8,6 @@ export type Config = {
   sourceOrigins: string[];
   publicDir: string;
   bookmarkletSrc: string;
-  bookmarkletTxt: string;
   vendor: { htmx: string; pico: string };
 };
 
@@ -33,7 +32,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
       .filter(Boolean),
     publicDir: path.join(ROOT_DIR, 'public'),
     bookmarkletSrc: path.join(ROOT_DIR, 'bookmarklet', 'bookmarklet.src.js'),
-    bookmarkletTxt: path.join(ROOT_DIR, 'bookmarklet', 'bookmarklet.txt'),
     vendor: { htmx: VENDOR.htmx, pico: VENDOR.pico },
   };
 }

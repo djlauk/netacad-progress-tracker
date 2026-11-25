@@ -51,7 +51,6 @@ npm start          → node src/server.ts
 npm run dev        → node --watch src/server.ts
 npm test           → node --test "test/**/*.test.ts"
 npm run typecheck  → tsc --noEmit
-npm run bookmarklet → node scripts/build-bookmarklet.ts   (schreibt bookmarklet/bookmarklet.txt)
 npm run dev:demo   → node scripts/demo.ts                 (Demo-Daten, siehe 10)
 ```
 
@@ -90,10 +89,8 @@ netacad-progress/
 │   ├── app.js               # nur: Text in die Zwischenablage kopieren, Drag & Drop für Upload
 │   └── import.js            # Import-Seite (siehe 4.3)
 ├── bookmarklet/
-│   ├── bookmarklet.src.js   # lesbare Quelle (Anhang A)
-│   └── bookmarklet.txt      # erzeugt, nicht von Hand bearbeiten
+│   └── bookmarklet.src.js   # lesbare Quelle (Anhang A); das fertige Bookmarklet wird zur Laufzeit erzeugt
 ├── scripts/
-│   ├── build-bookmarklet.ts
 │   └── demo.ts              # npm run dev:demo (siehe 10)
 ├── test/
 │   ├── *.test.ts
@@ -431,7 +428,7 @@ Tabelle aller Snapshot-Dateien: Kurs, `snapshotDate`, Anzahl Lernende, Status (o
 
 ### F. Einstellungen
 
-Formular für die Werte aus 4.7. Dazu ein Bereich «Bookmarklet» mit dem Inhalt von `bookmarklet/bookmarklet.txt` als Link zum Ziehen in die Lesezeichenleiste und einer kurzen Anleitung.
+Formular für die Werte aus 4.7. Dazu ein Bereich «Bookmarklet» mit dem Bookmarklet als Link zum Ziehen in die Lesezeichenleiste und einer kurzen Anleitung. Das Bookmarklet wird bei jedem Aufruf aus `bookmarklet/bookmarklet.src.js` mit dem aktuellen `PORT` erzeugt (Anhang A), es gibt keine erzeugte Datei. Der Linktext enthält den Port («NetAcad → Fortschritt (:8765)»), damit der Name des Lesezeichens zeigt, wohin es zielt. Hinweis: Nach einer Änderung von `PORT` das Lesezeichen neu in die Lesezeichenleiste ziehen. Lässt sich die Quelle nicht lesen oder verletzt sie die Regeln, zeigt der Bereich den Fehler statt des Links.
 
 ## 8. Gestaltung
 
@@ -476,7 +473,7 @@ Die Daten sind Personendaten von Lernenden (Schweiz, nDSG).
   - Import: Vorschau, Commit, Duplikat (gleiches `exportedAt`) → «bereits vorhanden»
   - Kontakt erfassen → in `notes.json`; Backup angelegt
   - `HX-Request` → Fragment, sonst ganze Seite
-- **Bookmarklet:** `scripts/build-bookmarklet.ts` bricht ab, wenn das Ergebnis Nicht-ASCII-Zeichen, `%` oder `//`-Kommentare enthält.
+- **Bookmarklet:** `buildBookmarklet` (`logic/bookmarklet.ts`) wirft einen Fehler, wenn das Ergebnis Nicht-ASCII-Zeichen, `%` oder `//`-Kommentare enthält. Die echte Quelle besteht diese Prüfung und ergibt gültiges JavaScript. Die Einstellungsseite enthält ein Bookmarklet mit dem konfigurierten `PORT`.
 - `npm run dev:demo` startet mit `DATA_DIR=test/fixtures/demo` (Kopie der Fixtures), damit die Oberfläche ohne echte Daten ausprobiert werden kann.
 
 ## 11. Akzeptanzkriterien
@@ -507,7 +504,7 @@ Automatischer Abruf von NetAcad, E-Mail-Versand, mehrere Benutzer, Betrieb im Ne
 
 ## Anhang A: Bookmarklet
 
-Die lesbare Quelle liegt in `bookmarklet/bookmarklet.src.js`, das fertige Bookmarklet in `bookmarklet/bookmarklet.txt` (erzeugt mit `npm run bookmarklet`). Die Extraktion ist gegen das reale Gradebook-HTML getestet (November 2026).
+Die lesbare Quelle liegt in `bookmarklet/bookmarklet.src.js`. Das fertige Bookmarklet erzeugt der Server bei jedem Aufruf der Einstellungsseite (F). Es gibt keinen Build-Schritt, damit das Bookmarklet nach einer Änderung von `PORT` nicht veraltet. Die Extraktion ist gegen das reale Gradebook-HTML getestet (November 2026).
 
 Ablauf:
 
@@ -515,10 +512,10 @@ Ablauf:
 2. `json = JSON.stringify(data, null, 2)` (eingerückt, damit die Datei von Hand lesbar ist).
 3. Wenn `json.length < 1000000`: neuer Tab mit `SERVER + '/import#' + encodeURIComponent(json)` (`#` in der Quelle als Escape-Sequenz, siehe Regeln). Gibt `window.open` ein Fenster zurück, ist das Bookmarklet fertig.
 4. Sonst (zu gross oder Tab blockiert): Download als `<snapshotDate>-<Kurstitel bereinigt>_gradebook.json`, dazu `alert('Import-Tab konnte nicht geöffnet werden. Datei wurde heruntergeladen; bitte unter «Dateien» hochladen.')`.
-5. `SERVER` ist in der Quelle der Platzhalter `__SERVER_ORIGIN__`. `scripts/build-bookmarklet.ts` ersetzt ihn durch `http://localhost:<PORT>` aus `config.ts`.
+5. `SERVER` ist in der Quelle der Platzhalter `__SERVER_ORIGIN__`. `buildBookmarklet` (`logic/bookmarklet.ts`) ersetzt ihn durch `http://localhost:<PORT>` aus `config.ts`. Das Bookmarklet kann den Port nicht selbst ermitteln: Von der NetAcad-Seite aus verhindern CSP und Chrome-Regeln für Zugriffe aufs lokale Netz das Abtasten von `localhost`, und `window.open` liefert auch bei einem falschen Port ein Fenster. Der Port ist deshalb fest im Lesezeichen enthalten.
 6. Unter «Einstellungen → Bookmarklet» ist das Bookmarklet als Link zum Ziehen, als Code zum Kopieren und als lesbare Quelle einsehbar.
 
-**Regeln für `bookmarklet.src.js`:** keine `//`-Kommentare (die Quelle wird zu einer Zeile zusammengefügt), kein `%` im Code (Browser dekodieren `%XX` in `javascript:`-URLs; deshalb `\x25`), nur ASCII (Umlaute als `\u00fc` usw.), jede Anweisung mit `;` oder `}` abgeschlossen. `build-bookmarklet.ts` trimmt die Zeilen, fügt sie zusammen, setzt `javascript:` davor und prüft die Regeln.
+**Regeln für `bookmarklet.src.js`:** keine `//`-Kommentare (die Quelle wird zu einer Zeile zusammengefügt), kein `%` im Code (Browser dekodieren `%XX` in `javascript:`-URLs; deshalb `\x25`), nur ASCII (Umlaute als `\u00fc` usw.), jede Anweisung mit `;` oder `}` abgeschlossen. `buildBookmarklet` trimmt die Zeilen, fügt sie zusammen, setzt `javascript:` davor und prüft die Regeln.
 
 Quelle (`bookmarklet/bookmarklet.src.js`):
 

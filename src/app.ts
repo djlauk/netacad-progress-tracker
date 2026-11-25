@@ -134,24 +134,15 @@ export function createApp(opts: AppOptions) {
     return { model, settings, notes, today: today() };
   }
 
+  /** Built on every request from the source, so it always targets the current PORT. */
   function bookmarklet() {
     const origin = serverOrigin(config.port);
     let source = '';
     try {
       source = fs.readFileSync(config.bookmarkletSrc, 'utf8');
-    } catch {
-      /* missing source */
-    }
-    try {
-      return { code: fs.readFileSync(config.bookmarkletTxt, 'utf8').trim(), source, fromFile: true, origin };
-    } catch {
-      let code = '';
-      try {
-        code = buildBookmarklet(source, origin);
-      } catch (e) {
-        code = `Fehler: ${(e as Error).message}`;
-      }
-      return { code, source, fromFile: false, origin };
+      return { code: buildBookmarklet(source, origin), error: null, source, port: config.port, origin };
+    } catch (e) {
+      return { code: '', error: (e as Error).message, source, port: config.port, origin };
     }
   }
 

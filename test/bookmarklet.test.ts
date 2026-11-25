@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import { test } from 'node:test';
-import { ROOT_DIR, loadConfig } from '../src/config.ts';
+import { createApp } from '../src/app.ts';
+import { loadConfig } from '../src/config.ts';
 import { buildBookmarklet, checkBookmarklet } from '../src/logic/bookmarklet.ts';
+import { TODAY, tempDataDir } from './helpers.ts';
 
 const SRC = fs.readFileSync(loadConfig({}).bookmarkletSrc, 'utf8');
 
@@ -23,9 +24,12 @@ test('build rejects non-ASCII, % and // comments', () => {
   assert.doesNotThrow(() => checkBookmarklet("javascript:(()=>{const u='http://localhost:1';})()"));
 });
 
-test('build script writes bookmarklet.txt', () => {
-  const r = spawnSync(process.execPath, ['scripts/build-bookmarklet.ts'], { cwd: ROOT_DIR, encoding: 'utf8' });
-  assert.equal(r.status, 0, r.stderr);
-  const txt = fs.readFileSync(loadConfig({}).bookmarkletTxt, 'utf8').trim();
-  assert.ok(txt.startsWith('javascript:'));
+test('settings page builds the bookmarklet for the current PORT', async () => {
+  const dataDir = tempDataDir(false);
+  const config = { ...loadConfig({ PORT: '6003' }), dataDir };
+  const { app } = createApp({ config, csrfToken: 't', today: () => TODAY, log: () => {} });
+  const body = await (await app.request('http://localhost:6003/settings')).text();
+  assert.match(body, /href="javascript:[^"]*localhost:6003/);
+  assert.match(body, /NetAcad → Fortschritt \(:6003\)/);
+  assert.doesNotMatch(body, /localhost:8765/);
 });

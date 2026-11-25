@@ -10,7 +10,7 @@ export const toForm = (s: Settings): SettingsForm => ({
   contactSubject: s.contactSubject, contactTemplate: s.contactTemplate,
 });
 
-export function settingsPage(form: SettingsForm, csrf: string, msgs: { kind: 'error' | 'ok'; text: string }[], bookmarklet: { code: string; source: string; fromFile: boolean; origin: string }): Html {
+export function settingsPage(form: SettingsForm, csrf: string, msgs: { kind: 'error' | 'ok'; text: string }[], bookmarklet: { code: string; error: string | null; source: string; port: number; origin: string }): Html {
   return html`<hgroup class="page-head"><h1>Einstellungen</h1><p>Gespeichert in <code>data/settings.json</code></p></hgroup>
 <section id="settings-form">
 <form method="post" action="/settings" hx-post="/settings" hx-target="#settings-form" hx-select="#settings-form" hx-swap="outerHTML">
@@ -29,14 +29,15 @@ ${placeholderHint()}
 </section>
 <section id="bookmarklet">
 <h2>Bookmarklet</h2>
+${bookmarklet.error ? html`<p><mark>Bookmarklet kann nicht erzeugt werden: ${bookmarklet.error}</mark></p>` : ''}
 <ol>
-<li>Den Link <a class="bookmarklet" href="${bookmarklet.code}" draggable="true">NetAcad → Fortschritt</a> in die Lesezeichenleiste ziehen.
+<li>Den Link ${bookmarklet.error ? html`<s>NetAcad → Fortschritt</s>` : html`<a class="bookmarklet" href="${bookmarklet.code}" draggable="true">NetAcad → Fortschritt (:${bookmarklet.port})</a>`} in die Lesezeichenleiste ziehen.
 Alternativ ein neues Lesezeichen anlegen und den Code unten als Adresse einfügen.</li>
 <li>In NetAcad das <em>Course Gradebook</em> öffnen. Alle Lernenden sichtbar machen (Paginierung: alle Zeilen auf einer Seite).</li>
 <li>Das Lesezeichen anklicken. Es öffnet einen neuen Tab mit der Import-Vorschau. Dort auf «Importieren» klicken.</li>
 <li>Falls der Tab nicht aufgeht, lädt das Bookmarklet die Datei herunter. Diese unter <a href="/files">Dateien</a> hochladen.</li>
 </ol>
-<p><small>Ziel: <code>${bookmarklet.origin}</code>${bookmarklet.fromFile ? '' : html` · <strong>bookmarklet/bookmarklet.txt fehlt</strong>, Code wurde aus der Quelle erzeugt (<code>npm run bookmarklet</code>)`}</small></p>
+<p><small>Ziel: <code>${bookmarklet.origin}</code>. Das Bookmarklet enthält den Port fest. Nach einer Änderung von <code>PORT</code> das alte Lesezeichen löschen und den Link neu in die Lesezeichenleiste ziehen. Ein veraltetes Lesezeichen öffnet einen Tab, der nicht lädt.</small></p>
 <label>Code<textarea id="bookmarklet-code" rows="5" readonly spellcheck="false">${bookmarklet.code}</textarea></label>
 <button type="button" class="secondary" data-copy-target="#bookmarklet-code">Code kopieren</button>
 <details><summary>Lesbare Quelle</summary><pre><code>${bookmarklet.source}</code></pre></details>
